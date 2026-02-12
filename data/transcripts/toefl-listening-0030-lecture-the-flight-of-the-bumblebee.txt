@@ -1,0 +1,50 @@
+Okay!
+So, today I am going to talk about the flight of the bumblebee.
+Many years ago, scientists believed that the flight of the bumblebee defied the law of physics.
+They took the weight of a bumblebee and its wing area into account and did some calculations.
+They found, from an aerodynamic point of the view,
+the way a bumblebee flies doesn't make any sense.
+In fact, scientists believed that bumblebees couldn't even fly.
+That's why there is a famous quote, “Aerodynamically, the bumblebee shouldn't be able to fly",
+"but the bumblebee doesn't know it so it goes on flying anyway”.
+Now you must be wondering how come we still see bumblebees flying around amidst the flowers.
+It turned out that scientists were wrong.
+The big misconception about bumblebee flight is the belief that bumblebees flap their wings up and down.
+In addition, the fluid dynamics behind the flight of a bumblebee are different from those that allow a plane to fly.
+An airplane's wing forces air down,
+which in turn pushes its wing upward.
+For bumblebees, it isn't so simple.
+They flap their wings back and forth.
+As a bumblebee takes flight,
+the angle to the wing creates vortices in the air like small hurricanes.
+The eyes of those vortices have lower pressure than the surrounding air and suck the wing upwards.
+This is what gives the bumblebee the extra bit of lift it needs to buzz around from flower to flower.
+It's just like if you move a spoon through a cup of coffee;
+you'll see the flow swirl around the sharp edge.
+If you move the spoon quickly,
+you'll actually see a dimple at the center of the vortex caused by the lower pressure.
+Amazing, right?
+But this is not what amazes me the most.
+What I am most intrigued by is how these bees are able to find the most efficient route between flowers.
+You see, bumblebees foraging for nectar in flowers are like salesmen traveling between towns.
+Both seek the optimal route to minimize their travel costs.
+In order to find out how they achieve this,
+a team of researchers conducted an experiment.
+They trained the bees to forage nectar from five blue artificial flowers.
+Each artificial flower had a yellow landing platform and a single drop of sucrose,
+just enough to fill one-fifth of a bumblebee's tank capacity.
+This ensured that the bees would visit all five flowers on each foraging route.
+The researchers arranged the flowers in a pentagon and spaced them 50 meters apart.
+This distance is more than three times as far as bumblebees can see,
+so the bees must actively fly around to locate their next target.
+A motion-triggered Webcam was attached to each flower to record the bees' visits.
+Then, every day for a month, each bee was freed to forage for 7 hours.
+At first, the bumblebees visited the flower nearest to their nest,
+and then the next closest flower.
+It appeared that the bees kept track- that is, they remembered -
+the total distance traveled on each foraging trip.
+They tried new routes to increase their efficiency,
+and if a route was shorter, they used this route instead.
+If not, they abandoned it.
+As their experience increased,
+the bumblebees were able to select the most efficient path to visit the flowers.

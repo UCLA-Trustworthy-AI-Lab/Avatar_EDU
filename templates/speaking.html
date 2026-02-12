@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speaking Practice - Language Arts Agent</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --accent-color: #FF9800;
+            --danger-color: #f44336;
+            --success-color: #8BC34A;
+            --recording-color: #e53e3e;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .practice-type-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .practice-type-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .practice-type-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .practice-type-card.selected {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, #e8f5e8, #f0fff0);
+        }
+
+        .practice-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .practice-area {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .practice-area.active {
+            display: block;
+        }
+
+        .word-display {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 25px;
+            border: 2px solid #dee2e6;
+        }
+
+        .practice-word {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .word-phonetic {
+            font-size: 1.2rem;
+            color: #6c757d;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+
+        .word-meaning {
+            font-size: 1rem;
+            color: #495057;
+            line-height: 1.6;
+        }
+
+        .recording-controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .record-btn {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: none;
+            background: var(--primary-color);
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .record-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+        }
+
+        .record-btn.recording {
+            background: var(--recording-color);
+            animation: pulse 1.5s infinite;
+        }
+
+        .record-btn.processing {
+            background: var(--accent-color);
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .audio-wave {
+            width: 100%;
+            height: 80px;
+            margin: 20px 0;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #dee2e6;
+        }
+
+        .audio-wave.active {
+            display: flex;
+        }
+
+        .wave-bars {
+            display: flex;
+            align-items: end;
+            gap: 3px;
+            height: 50px;
+        }
+
+        .wave-bar {
+            width: 4px;
+            background: var(--primary-color);
+            border-radius: 2px;
+            transition: height 0.1s ease;
+        }
+
+        .ielts-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .ielts-section.active {
+            display: block;
+        }
+
+        .ielts-timer {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .timer-display {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .timer-label {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .ielts-topic {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid var(--secondary-color);
+        }
+
+        .topic-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+
+        .topic-question {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #495057;
+        }
+
+        .prep-notes {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 120px;
+            border: 2px solid #dee2e6;
+            resize: vertical;
+            font-family: inherit;
+            width: 100%;
+        }
+
+        .phase-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .phase-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .phase-btn.prep {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .phase-btn.speak {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .phase-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .score-card {
+            background: linear-gradient(135deg, #f0fff0, #e8f5e8);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid #d4edda;
+        }
+
+        .score-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .score-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .feedback-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 25px;
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .status-message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-message.active {
+            display: block;
+        }
+
+        .navigation-buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn.primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .nav-btn.secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-indicator {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .progress-text {
+            font-size: 1.1rem;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar-container {
+            background: #dee2e6;
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header-section">
+            <h1><i class="bi bi-mic"></i> Speaking Practice</h1>
+            <p class="lead">Improve your pronunciation and speaking skills with AI-powered feedback</p>
+        </div>
+
+        <!-- Practice Type Selection -->
+        <div id="practiceSelector" class="practice-type-selector">
+            <div class="practice-type-card" data-type="words">
+                <div class="practice-icon">
+                    <i class="bi bi-chat-quote"></i>
+                </div>
+                <h5>Words</h5>
+                <p>Practice pronunciation of individual words with detailed phonetic feedback</p>
+            </div>
+            <div class="practice-type-card" data-type="sentences">
+                <div class="practice-icon">
+                    <i class="bi bi-chat-left-text"></i>
+                </div>
+                <h5>Sentences</h5>
+                <p>Improve sentence flow, intonation, and natural speech patterns</p>
+            </div>
+            <div class="practice-type-card" data-type="paragraphs">
+                <div class="practice-icon">
+                    <i class="bi bi-file-text"></i>
+                </div>
+                <h5>Paragraphs</h5>
+                <p>Practice extended speech with focus on coherence and fluency</p>
+            </div>
+            <div class="practice-type-card" data-type="ielts">
+                <div class="practice-icon">
+                    <i class="bi bi-award"></i>
+                </div>
+                <h5>IELTS Topics</h5>
+                <p>Structured practice with 90s preparation + 1 minute speaking</p>
+            </div>
+        </div>
+
+        <!-- Words Practice Section -->
+        <div id="wordsSection" class="practice-area">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3><i class="bi bi-chat-quote"></i> Word Pronunciation Practice</h3>
+                <button class="btn btn-outline-secondary" onclick="backToSelector()">
+                    <i class="bi bi-arrow-left"></i> Back to Practice Types
+                </button>
+            </div>
+
+            <div class="progress-indicator">
+                <div class="progress-text">Progress: <span id="wordProgress">1 of 10</span></div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="wordProgressBar" style="width: 10%"></div>
+                </div>
+            </div>
+
+            <div class="word-display">
+                <div class="practice-word" id="currentWord">pronunciation</div>
+                <div class="word-phonetic" id="wordPhonetic">/prəˌnʌnsiˈeɪʃən/</div>
+                <div class="word-meaning" id="wordMeaning">The way in which a word is pronounced</div>
+            </div>
+
+            <div class="status-message" id="wordStatus">
+                Click the microphone to start recording. Say the word clearly and naturally.
+            </div>
+
+            <div class="recording-controls">
+                <button class="record-btn" id="wordRecordBtn" onclick="toggleWordRecording()">
+                    <i class="bi bi-mic"></i>
+                </button>
+                <div class="audio-wave" id="wordAudioWave">
+                    <div class="wave-bars" id="wordWaveBars"></div>
+                </div>
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="nav-btn secondary" onclick="skipWord()">Skip Word</button>
+                <button class="nav-btn primary" onclick="nextWord()" style="display: none;" id="nextWordBtn">
+                    Next Word
+                </button>
+            </div>
+        </div>
+
+        <!-- Sentences Practice Section -->
+        <div id="sentencesSection" class="practice-area">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3><i class="bi bi-chat-left-text"></i> Sentence Practice</h3>
+                <button class="btn btn-outline-secondary" onclick="backToSelector()">
+                    <i class="bi bi-arrow-left"></i> Back to Practice Types
+                </button>
+            </div>
+
+            <div class="progress-indicator">
+                <div class="progress-text">Progress: <span id="sentenceProgress">1 of 8</span></div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="sentenceProgressBar" style="width: 12.5%"></div>
+                </div>
+            </div>
+
+            <div class="word-display">
+                <div class="practice-word" id="currentSentence" style="font-size: 1.8rem;">
+                    Technology has revolutionized the way we communicate.
+                </div>
+                <div class="word-meaning" id="sentenceContext">
+                    Focus on clear pronunciation, natural intonation, and appropriate pauses.
+                </div>
+            </div>
+
+            <div class="status-message" id="sentenceStatus">
+                Click the microphone to record the sentence. Speak naturally with proper intonation.
+            </div>
+
+            <div class="recording-controls">
+                <button class="record-btn" id="sentenceRecordBtn" onclick="toggleSentenceRecording()">
+                    <i class="bi bi-mic"></i>
+                </button>
+                <div class="audio-wave" id="sentenceAudioWave">
+                    <div class="wave-bars" id="sentenceWaveBars"></div>
+                </div>
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="nav-btn secondary" onclick="skipSentence()">Skip Sentence</button>
+                <button class="nav-btn primary" onclick="nextSentence()" style="display: none;" id="nextSentenceBtn">
+                    Next Sentence
+                </button>
+            </div>
+        </div>
+
+        <!-- Paragraphs Practice Section -->
+        <div id="paragraphsSection" class="practice-area">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3><i class="bi bi-file-text"></i> Paragraph Practice</h3>
+                <button class="btn btn-outline-secondary" onclick="backToSelector()">
+                    <i class="bi bi-arrow-left"></i> Back to Practice Types
+                </button>
+            </div>
+
+            <div class="progress-indicator">
+                <div class="progress-text">Progress: <span id="paragraphProgress">1 of 5</span></div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="paragraphProgressBar" style="width: 20%"></div>
+                </div>
+            </div>
+
+            <div class="word-display">
+                <div class="practice-word" id="currentParagraph" style="font-size: 1.3rem; text-align: left; line-height: 1.8;">
+                    Technology has dramatically changed how we communicate with each other. Social media platforms allow us to stay connected with friends and family around the world. However, some people worry that digital communication is replacing face-to-face interactions. Finding the right balance between online and offline communication is important for maintaining meaningful relationships.
+                </div>
+                <div class="word-meaning" id="paragraphContext">
+                    Focus on fluency, natural speech rhythm, and coherent delivery. Take your time.
+                </div>
+            </div>
+
+            <div class="status-message" id="paragraphStatus">
+                Click the microphone to record the paragraph. Speak fluently with natural pauses.
+            </div>
+
+            <div class="recording-controls">
+                <button class="record-btn" id="paragraphRecordBtn" onclick="toggleParagraphRecording()">
+                    <i class="bi bi-mic"></i>
+                </button>
+                <div class="audio-wave" id="paragraphAudioWave">
+                    <div class="wave-bars" id="paragraphWaveBars"></div>
+                </div>
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="nav-btn secondary" onclick="skipParagraph()">Skip Paragraph</button>
+                <button class="nav-btn primary" onclick="nextParagraph()" style="display: none;" id="nextParagraphBtn">
+                    Next Paragraph
+                </button>
+            </div>
+        </div>
+
+        <!-- IELTS Topic Section -->
+        <div id="ieltsSection" class="ielts-section">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3><i class="bi bi-award"></i> IELTS Speaking Practice</h3>
+                <button class="btn btn-outline-secondary" onclick="backToSelector()">
+                    <i class="bi bi-arrow-left"></i> Back to Practice Types
+                </button>
+            </div>
+
+            <div class="ielts-timer">
+                <div class="timer-display" id="ieltsTimer">01:30</div>
+                <div class="timer-label" id="ieltsPhase">Preparation Time</div>
+            </div>
+
+            <div class="ielts-topic">
+                <div class="topic-title" id="ieltsTopicTitle">
+                    Describe a memorable journey you have taken
+                </div>
+                <div class="topic-question" id="ieltsTopicQuestion">
+                    Talk about a journey that was particularly memorable for you. You should say:
+                    <ul class="mt-3">
+                        <li>Where you went and when</li>
+                        <li>Who you traveled with</li>
+                        <li>What made this journey special</li>
+                        <li>How this experience affected you</li>
+                    </ul>
+                    You have 90 seconds to prepare your answer and 1 minute to speak.
+                </div>
+
+                <textarea class="prep-notes" id="ieltsNotes" placeholder="Use this space to make notes for your answer... (optional)"></textarea>
+            </div>
+
+            <div class="status-message" id="ieltsStatus">
+                Use the preparation time to think about your answer. You can make notes below.
+            </div>
+
+            <div class="phase-buttons">
+                <button class="phase-btn prep" id="startPrepBtn" onclick="startPreparation()">
+                    Start Preparation (90s)
+                </button>
+                <button class="phase-btn speak" id="startSpeakBtn" onclick="startSpeaking()" disabled>
+                    Start Speaking (1min)
+                </button>
+            </div>
+
+            <div class="recording-controls" style="display: none;" id="ieltsRecordingControls">
+                <div class="audio-wave active" id="ieltsAudioWave">
+                    <div class="wave-bars" id="ieltsWaveBars"></div>
+                </div>
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="nav-btn secondary" onclick="newIELTSTopic()">New Topic</button>
+                <button class="nav-btn primary" onclick="finishIELTS()" style="display: none;" id="finishIELTSBtn">
+                    Finish & Get Feedback
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="results-section">
+            <h3><i class="bi bi-graph-up"></i> Speaking Assessment Results</h3>
+
+            <div class="score-grid">
+                <div class="score-card">
+                    <div class="score-value" id="pronunciationScore">--</div>
+                    <div class="score-label">Pronunciation</div>
+                </div>
+                <div class="score-card">
+                    <div class="score-value" id="fluencyScore">--</div>
+                    <div class="score-label">Fluency</div>
+                </div>
+                <div class="score-card">
+                    <div class="score-value" id="accuracyScore">--</div>
+                    <div class="score-label">Accuracy</div>
+                </div>
+                <div class="score-card">
+                    <div class="score-value" id="overallScore">--</div>
+                    <div class="score-label">Overall</div>
+                </div>
+            </div>
+
+            <div class="feedback-section">
+                <h5><i class="bi bi-chat-square-text"></i> Detailed Feedback</h5>
+                <div id="feedbackContent">
+                    <p>Your detailed pronunciation assessment will appear here...</p>
+                </div>
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="nav-btn secondary" onclick="replayRecording()" id="replayBtn" disabled>
+                    <i class="bi bi-play-circle"></i> Replay Recording
+                </button>
+                <button class="nav-btn secondary" onclick="practiceAgain()">Practice Again</button>
+                <button class="nav-btn primary" onclick="backToSelector()">Back to Home</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+        let currentType = '';
+        let currentIndex = 0;
+        let totalItems = 0;
+        let ieltsTimer = null;
+        let ieltsTimeLeft = 90;
+        let ieltsPhase = 'prep'; // 'prep' or 'speak'
+        let lastRecordingBlob = null; // Store the last recording for replay
+
+        // Sample data
+        const practiceData = {
+            words: [
+                { word: 'pronunciation', phonetic: '/prəˌnʌnsiˈeɪʃən/', meaning: 'The way in which a word is pronounced' },
+                { word: 'articulation', phonetic: '/ɑːrˌtɪkjuˈleɪʃən/', meaning: 'The action of speaking or pronouncing clearly' },
+                { word: 'intonation', phonetic: '/ˌɪntəˈneɪʃən/', meaning: 'The rise and fall of the voice when speaking' },
+                { word: 'eloquent', phonetic: '/ˈeləkwənt/', meaning: 'Fluent and persuasive in speaking' },
+                { word: 'vocabulary', phonetic: '/vəˈkæbjuˌleri/', meaning: 'The set of words used by a person or language' },
+                { word: 'communication', phonetic: '/kəˌmjunɪˈkeɪʃən/', meaning: 'The means of sending or receiving information' },
+                { word: 'fluency', phonetic: '/ˈfluənsi/', meaning: 'The ability to speak easily and smoothly' },
+                { word: 'comprehension', phonetic: '/ˌkɑmprɪˈhenʃən/', meaning: 'The ability to understand' },
+                { word: 'expression', phonetic: '/ɪkˈspreʃən/', meaning: 'The action of conveying thought or feeling' },
+                { word: 'conversation', phonetic: '/ˌkɑnvərˈseɪʃən/', meaning: 'An informal talk between people' }
+            ],
+            sentences: [
+                'Technology has revolutionized the way we communicate.',
+                'Effective communication requires both speaking and listening skills.',
+                'Practice makes perfect when learning a new language.',
+                'Clear pronunciation helps others understand your message.',
+                'Confidence plays a crucial role in public speaking.',
+                'Different cultures have unique communication styles.',
+                'Body language often conveys more than words alone.',
+                'Regular practice improves speaking fluency significantly.'
+            ],
+            paragraphs: [
+                'Technology has dramatically changed how we communicate with each other. Social media platforms allow us to stay connected with friends and family around the world. However, some people worry that digital communication is replacing face-to-face interactions. Finding the right balance between online and offline communication is important for maintaining meaningful relationships.',
+                'Learning a new language opens doors to new opportunities and experiences. It allows you to connect with people from different cultures and understand their perspectives. While the process can be challenging, the rewards are immense. Regular practice, patience, and persistence are key to achieving fluency in any language.',
+                'Public speaking is a valuable skill that benefits both personal and professional life. Many people feel nervous when speaking in front of others, but this anxiety can be overcome with practice and preparation. The key is to start small, practice regularly, and gradually build confidence through positive experiences.',
+                'Effective teamwork requires clear communication and mutual respect among team members. When people work together toward a common goal, they can achieve remarkable results. Good team communication involves active listening, constructive feedback, and open dialogue about challenges and solutions.',
+                'Travel broadens our understanding of the world and exposes us to different ways of life. When we visit new places, we encounter diverse cultures, languages, and traditions. These experiences help us become more open-minded and appreciative of global diversity while also helping us understand our own culture better.'
+            ],
+            ieltsTopics: [
+                {
+                    title: 'Describe a memorable journey you have taken',
+                    question: 'Talk about a journey that was particularly memorable for you. You should say: Where you went and when, Who you traveled with, What made this journey special, How this experience affected you.'
+                },
+                {
+                    title: 'Describe a person who has influenced you',
+                    question: 'Talk about someone who has had a significant impact on your life. You should say: Who this person is, How you know them, What they did that influenced you, Why their influence was important to you.'
+                },
+                {
+                    title: 'Describe a skill you would like to learn',
+                    question: 'Talk about a skill you wish you could develop. You should say: What the skill is, Why you want to learn it, How you plan to learn it, What benefits this skill would bring to your life.'
+                }
+            ]
+        };
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Speaking practice module initialized');
+            setupEventListeners();
+            checkMicrophonePermission();
+        });
+
+        function setupEventListeners() {
+            // Practice type selection
+            document.querySelectorAll('.practice-type-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    selectPracticeType(this.dataset.type);
+                });
+            });
+        }
+
+        async function checkMicrophonePermission() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                stream.getTracks().forEach(track => track.stop());
+                console.log('Microphone permission granted');
+            } catch (error) {
+                console.error('Microphone permission denied:', error);
+                showStatus('error', 'Microphone access is required for speaking practice. Please grant permission and refresh the page.');
+            }
+        }
+
+        function selectPracticeType(type) {
+            console.log('Selected practice type:', type);
+            currentType = type;
+            currentIndex = 0;
+
+            // Hide selector and show appropriate section
+            document.getElementById('practiceSelector').style.display = 'none';
+
+            // Reset all sections
+            document.querySelectorAll('.practice-area, .ielts-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            if (type === 'ielts') {
+                document.getElementById('ieltsSection').classList.add('active');
+                initializeIELTSPractice();
+            } else {
+                document.getElementById(type + 'Section').classList.add('active');
+                initializePractice(type);
+            }
+        }
+
+        function initializePractice(type) {
+            totalItems = practiceData[type].length;
+            updateProgress(type);
+            loadCurrentItem(type);
+            showStatus('info', `Ready to practice ${type}. Click the microphone to start recording.`);
+        }
+
+        function loadCurrentItem(type) {
+            const data = practiceData[type][currentIndex];
+
+            if (type === 'words') {
+                document.getElementById('currentWord').textContent = data.word;
+                document.getElementById('wordPhonetic').textContent = data.phonetic;
+                document.getElementById('wordMeaning').textContent = data.meaning;
+            } else if (type === 'sentences') {
+                document.getElementById('currentSentence').textContent = data;
+            } else if (type === 'paragraphs') {
+                document.getElementById('currentParagraph').textContent = data;
+            }
+        }
+
+        function updateProgress(type) {
+            const current = currentIndex + 1;
+            const progressText = document.getElementById(type.slice(0, -1) + 'Progress');
+            const progressBar = document.getElementById(type.slice(0, -1) + 'ProgressBar');
+
+            if (progressText) {
+                progressText.textContent = `${current} of ${totalItems}`;
+            }
+            if (progressBar) {
+                const percentage = (current / totalItems) * 100;
+                progressBar.style.width = `${percentage}%`;
+            }
+        }
+
+        async function toggleWordRecording() {
+            if (isRecording) {
+                stopRecording('word');
+            } else {
+                startRecording('word');
+            }
+        }
+
+        async function toggleSentenceRecording() {
+            if (isRecording) {
+                stopRecording('sentence');
+            } else {
+                startRecording('sentence');
+            }
+        }
+
+        async function toggleParagraphRecording() {
+            if (isRecording) {
+                stopRecording('paragraph');
+            } else {
+                startRecording('paragraph');
+            }
+        }
+
+        async function startRecording(type) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        sampleRate: 16000,
+                        channelCount: 1,
+                        echoCancellation: true,
+                        noiseSuppression: true
+                    }
+                });
+
+                // Try WAV format first for Azure compatibility, fallback to WebM
+                let options;
+                if (MediaRecorder.isTypeSupported('audio/wav')) {
+                    options = { mimeType: 'audio/wav' };
+                } else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                    options = { mimeType: 'audio/webm;codecs=opus' };
+                } else {
+                    options = {}; // Use default
+                }
+
+                mediaRecorder = new MediaRecorder(stream, options);
+
+                audioChunks = [];
+                isRecording = true;
+
+                // Update UI
+                const recordBtn = document.getElementById(type + 'RecordBtn');
+                recordBtn.classList.add('recording');
+                recordBtn.innerHTML = '<i class="bi bi-stop-fill"></i>';
+
+                const audioWave = document.getElementById(type + 'AudioWave');
+                audioWave.classList.add('active');
+
+                showStatus('info', 'Recording... Click again to stop.');
+                startAudioVisualization(stream, type);
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    processRecording(type);
+                };
+
+                mediaRecorder.start();
+                console.log('Recording started for', type);
+
+            } catch (error) {
+                console.error('Error starting recording:', error);
+                showStatus('error', 'Could not start recording. Please check microphone permissions.');
+            }
+        }
+
+        function stopRecording(type) {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                isRecording = false;
+
+                // Update UI
+                const recordBtn = document.getElementById(type + 'RecordBtn');
+                recordBtn.classList.remove('recording');
+                recordBtn.classList.add('processing');
+                recordBtn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+
+                showStatus('info', 'Processing your recording...');
+                stopAudioVisualization(type);
+            }
+        }
+
+        function startAudioVisualization(stream, type) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const analyser = audioContext.createAnalyser();
+            const microphone = audioContext.createMediaStreamSource(stream);
+
+            microphone.connect(analyser);
+            analyser.fftSize = 256;
+
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            const waveBars = document.getElementById(type + 'WaveBars');
+            waveBars.innerHTML = '';
+
+            // Create wave bars
+            for (let i = 0; i < 20; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'wave-bar';
+                bar.style.height = '10px';
+                waveBars.appendChild(bar);
+            }
+
+            function animate() {
+                if (!isRecording) return;
+
+                analyser.getByteFrequencyData(dataArray);
+                const bars = waveBars.children;
+
+                for (let i = 0; i < bars.length; i++) {
+                    const height = (dataArray[i * 3] / 255) * 40 + 10;
+                    bars[i].style.height = height + 'px';
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
+        function stopAudioVisualization(type) {
+            const waveBars = document.getElementById(type + 'WaveBars');
+            const bars = waveBars.children;
+            for (let i = 0; i < bars.length; i++) {
+                bars[i].style.height = '10px';
+            }
+        }
+
+        async function processRecording(type) {
+            try {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                console.log('Audio blob created, size:', audioBlob.size);
+
+                // Store the recording for replay functionality
+                lastRecordingBlob = audioBlob;
+
+                // Get the text to assess
+                let referenceText = '';
+                if (type === 'word') {
+                    referenceText = practiceData.words[currentIndex].word;
+                } else if (type === 'sentence') {
+                    referenceText = practiceData.sentences[currentIndex];
+                } else if (type === 'paragraph') {
+                    referenceText = practiceData.paragraphs[currentIndex];
+                }
+
+                // Create form data for upload
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'recording.webm');
+                formData.append('reference_text', referenceText);
+                formData.append('practice_type', type);
+
+                // Check for auth token
+                const token = localStorage.getItem('auth_token');
+                if (!token) {
+                    showMockResults(type);
+                    return;
+                }
+
+                const response = await fetch('/api/speaking/assess-pronunciation', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const results = await response.json();
+                    console.log('Assessment results:', results);
+                    displayResults(results, type);
+                } else {
+                    console.error('Assessment failed:', response.status);
+                    showMockResults(type);
+                }
+
+            } catch (error) {
+                console.error('Error processing recording:', error);
+                showMockResults(type);
+            } finally {
+                // Reset recording button
+                const recordBtn = document.getElementById(type + 'RecordBtn');
+                recordBtn.classList.remove('processing');
+                recordBtn.innerHTML = '<i class="bi bi-mic"></i>';
+            }
+        }
+
+        function showMockResults(type) {
+            // Show mock results when Azure is not available
+            const mockResults = {
+                pronunciation_score: Math.floor(Math.random() * 20) + 75, // 75-95
+                fluency_score: Math.floor(Math.random() * 15) + 80,       // 80-95
+                accuracy_score: Math.floor(Math.random() * 25) + 70,      // 70-95
+                overall_score: Math.floor(Math.random() * 20) + 75,       // 75-95
+                feedback: "Good job! Keep practicing to improve your pronunciation. Focus on clear articulation and natural rhythm.",
+                status: "mock"
+            };
+
+            displayResults(mockResults, type);
+        }
+
+        function displayResults(results, type) {
+            // Update scores
+            document.getElementById('pronunciationScore').textContent = Math.round(results.pronunciation_score || 0);
+            document.getElementById('fluencyScore').textContent = Math.round(results.fluency_score || 0);
+            document.getElementById('accuracyScore').textContent = Math.round(results.accuracy_score || 0);
+            document.getElementById('overallScore').textContent = Math.round(results.overall_score || 0);
+
+            // Update feedback with enhanced educational insights
+            const feedbackContent = document.getElementById('feedbackContent');
+            let feedbackHTML = '';
+
+            if (results.status === 'mock') {
+                feedbackHTML += '<div class="alert alert-warning">';
+                feedbackHTML += '<h6><i class="bi bi-info-circle"></i> Practice Mode</h6>';
+                feedbackHTML += '<p>This is practice mode. For detailed AI-powered pronunciation assessment, please ensure you are logged in and Azure Speech Services are configured.</p>';
+                feedbackHTML += `<p><strong>Performance Summary:</strong> ${results.feedback || 'Great job practicing!'}</p>`;
+                if (results.recognized_text) {
+                    feedbackHTML += `<p><strong>What we heard:</strong> <em>"${results.recognized_text}"</em></p>`;
+                }
+                feedbackHTML += '</div>';
+            } else if (results.status === 'azure') {
+                // Enhanced Azure feedback with detailed insights
+                feedbackHTML += '<div class="alert alert-success">';
+                feedbackHTML += '<h6><i class="bi bi-robot"></i> AI-Powered Assessment Complete</h6>';
+                feedbackHTML += `<p class="mb-3">${results.feedback}</p>`;
+                feedbackHTML += '</div>';
+
+                // Detailed feedback sections
+                if (results.detailed_feedback) {
+                    const detailed = results.detailed_feedback;
+
+                    // Performance Summary
+                    if (detailed.performance_summary && detailed.performance_summary.length > 0) {
+                        feedbackHTML += '<div class="mt-3">';
+                        feedbackHTML += '<h6><i class="bi bi-chart-line"></i> Performance Analysis</h6>';
+                        detailed.performance_summary.forEach(summary => {
+                            feedbackHTML += `<p class="mb-2">• ${summary}</p>`;
+                        });
+                        feedbackHTML += '</div>';
+                    }
+
+                    // Score Breakdown
+                    if (detailed.score_breakdown && detailed.score_breakdown.length > 0) {
+                        feedbackHTML += '<div class="mt-3">';
+                        feedbackHTML += '<h6><i class="bi bi-clipboard-data"></i> Detailed Score Analysis</h6>';
+                        detailed.score_breakdown.forEach(breakdown => {
+                            feedbackHTML += `<p class="mb-2">• ${breakdown}</p>`;
+                        });
+                        feedbackHTML += '</div>';
+                    }
+
+                    // Improvement Tips
+                    if (detailed.improvement_tips && detailed.improvement_tips.length > 0) {
+                        feedbackHTML += '<div class="mt-3">';
+                        feedbackHTML += '<h6><i class="bi bi-lightbulb"></i> Personalized Practice Tips</h6>';
+                        feedbackHTML += '<div class="row">';
+                        detailed.improvement_tips.forEach((tip, index) => {
+                            feedbackHTML += `<div class="col-md-6 mb-2">`;
+                            feedbackHTML += `<div class="bg-light p-2 rounded">• ${tip}</div>`;
+                            feedbackHTML += '</div>';
+                        });
+                        feedbackHTML += '</div>';
+                        feedbackHTML += '</div>';
+                    }
+
+                    // Problem Phonemes (for educational focus)
+                    if (detailed.problem_phonemes && detailed.problem_phonemes.length > 0) {
+                        feedbackHTML += '<div class="mt-3">';
+                        feedbackHTML += '<h6><i class="bi bi-exclamation-triangle-fill text-warning"></i> Sounds to Practice</h6>';
+                        feedbackHTML += '<div class="d-flex flex-wrap gap-2">';
+                        detailed.problem_phonemes.forEach(phoneme => {
+                            feedbackHTML += `<span class="badge bg-warning text-dark fs-6">${phoneme}</span>`;
+                        });
+                        feedbackHTML += '</div>';
+                        feedbackHTML += '</div>';
+                    }
+
+                    // Excellent Words (positive reinforcement)
+                    if (detailed.excellent_words && detailed.excellent_words.length > 0) {
+                        feedbackHTML += '<div class="mt-3">';
+                        feedbackHTML += '<h6><i class="bi bi-star-fill text-success"></i> Perfect Pronunciation</h6>';
+                        feedbackHTML += '<div class="d-flex flex-wrap gap-2">';
+                        detailed.excellent_words.forEach(word => {
+                            feedbackHTML += `<span class="badge bg-success fs-6">${word}</span>`;
+                        });
+                        feedbackHTML += '</div>';
+                        feedbackHTML += '</div>';
+                    }
+                }
+
+                // Recognized Text
+                if (results.recognized_text) {
+                    feedbackHTML += '<div class="mt-3">';
+                    feedbackHTML += '<h6><i class="bi bi-mic"></i> What We Heard</h6>';
+                    feedbackHTML += `<div class="bg-light p-3 rounded"><em>"${results.recognized_text}"</em></div>`;
+                    feedbackHTML += '</div>';
+                }
+
+                // Word-level analysis (if available)
+                if (results.word_analysis && results.word_analysis.length > 0) {
+                    feedbackHTML += '<div class="mt-3">';
+                    feedbackHTML += '<h6><i class="bi bi-search"></i> Word-by-Word Analysis</h6>';
+                    feedbackHTML += '<div class="row">';
+                    results.word_analysis.slice(0, 6).forEach(word => { // Show first 6 words
+                        const statusClass = word.status === 'excellent' ? 'success' :
+                                          word.status === 'good' ? 'warning' : 'danger';
+                        feedbackHTML += `<div class="col-md-4 mb-2">`;
+                        feedbackHTML += `<div class="card border-${statusClass}">`;
+                        feedbackHTML += `<div class="card-body p-2">`;
+                        feedbackHTML += `<h6 class="card-title mb-1">${word.word}</h6>`;
+                        feedbackHTML += `<p class="card-text small mb-0">Score: ${Math.round(word.accuracy_score || 0)}/100</p>`;
+                        feedbackHTML += `</div></div></div>`;
+                    });
+                    feedbackHTML += '</div>';
+                    feedbackHTML += '</div>';
+                }
+            }
+
+            feedbackContent.innerHTML = feedbackHTML;
+
+            // Show success message and next button
+            showStatus('success', 'Assessment complete! Check your results below.');
+
+            const nextBtn = document.getElementById('next' + type.charAt(0).toUpperCase() + type.slice(1) + 'Btn');
+            if (nextBtn) nextBtn.style.display = 'inline-block';
+
+            // Hide audio wave
+            const audioWave = document.getElementById(type + 'AudioWave');
+            audioWave.classList.remove('active');
+
+            // Show results section
+            document.getElementById('resultsSection').classList.add('active');
+
+            // Enable replay button if we have a recording
+            const replayBtn = document.getElementById('replayBtn');
+            if (lastRecordingBlob && replayBtn) {
+                replayBtn.disabled = false;
+            }
+        }
+
+        function nextWord() {
+            if (currentIndex < totalItems - 1) {
+                currentIndex++;
+                updateProgress('words');
+                loadCurrentItem('words');
+                resetRecordingUI('word');
+                document.getElementById('nextWordBtn').style.display = 'none';
+                document.getElementById('resultsSection').classList.remove('active');
+                showStatus('info', 'Ready for the next word. Click the microphone to start recording.');
+            } else {
+                showStatus('success', 'Congratulations! You completed all words in this practice session.');
+            }
+        }
+
+        function nextSentence() {
+            if (currentIndex < totalItems - 1) {
+                currentIndex++;
+                updateProgress('sentences');
+                loadCurrentItem('sentences');
+                resetRecordingUI('sentence');
+                document.getElementById('nextSentenceBtn').style.display = 'none';
+                document.getElementById('resultsSection').classList.remove('active');
+                showStatus('info', 'Ready for the next sentence. Click the microphone to start recording.');
+            } else {
+                showStatus('success', 'Excellent! You completed all sentences in this practice session.');
+            }
+        }
+
+        function nextParagraph() {
+            if (currentIndex < totalItems - 1) {
+                currentIndex++;
+                updateProgress('paragraphs');
+                loadCurrentItem('paragraphs');
+                resetRecordingUI('paragraph');
+                document.getElementById('nextParagraphBtn').style.display = 'none';
+                document.getElementById('resultsSection').classList.remove('active');
+                showStatus('info', 'Ready for the next paragraph. Click the microphone to start recording.');
+            } else {
+                showStatus('success', 'Outstanding! You completed all paragraphs in this practice session.');
+            }
+        }
+
+        function skipWord() {
+            nextWord();
+        }
+
+        function skipSentence() {
+            nextSentence();
+        }
+
+        function skipParagraph() {
+            nextParagraph();
+        }
+
+        function resetRecordingUI(type) {
+            const recordBtn = document.getElementById(type + 'RecordBtn');
+            recordBtn.classList.remove('recording', 'processing');
+            recordBtn.innerHTML = '<i class="bi bi-mic"></i>';
+
+            const audioWave = document.getElementById(type + 'AudioWave');
+            audioWave.classList.remove('active');
+        }
+
+        // IELTS Functions
+        function initializeIELTSPractice() {
+            // Reset IELTS state
+            ieltsPhase = 'prep';
+            ieltsTimeLeft = 90;
+            document.getElementById('ieltsTimer').textContent = '01:30';
+            document.getElementById('ieltsPhase').textContent = 'Preparation Time';
+
+            // Load random topic
+            const randomTopic = practiceData.ieltsTopics[Math.floor(Math.random() * practiceData.ieltsTopics.length)];
+            document.getElementById('ieltsTopicTitle').textContent = randomTopic.title;
+            document.getElementById('ieltsTopicQuestion').innerHTML = randomTopic.question;
+
+            // Reset buttons
+            document.getElementById('startPrepBtn').disabled = false;
+            document.getElementById('startSpeakBtn').disabled = true;
+            document.getElementById('finishIELTSBtn').style.display = 'none';
+            document.getElementById('ieltsRecordingControls').style.display = 'none';
+
+            showStatus('info', 'Read the topic carefully. When ready, click "Start Preparation" to begin your 90-second preparation time.');
+        }
+
+        function startPreparation() {
+            ieltsPhase = 'prep';
+            ieltsTimeLeft = 90;
+            document.getElementById('startPrepBtn').disabled = true;
+            document.getElementById('ieltsPhase').textContent = 'Preparation Time - Think and Make Notes';
+
+            showStatus('info', 'Preparation time started! Use this time to organize your thoughts and make notes.');
+
+            ieltsTimer = setInterval(() => {
+                ieltsTimeLeft--;
+                const minutes = Math.floor(ieltsTimeLeft / 60);
+                const seconds = ieltsTimeLeft % 60;
+                document.getElementById('ieltsTimer').textContent =
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                if (ieltsTimeLeft <= 0) {
+                    clearInterval(ieltsTimer);
+                    preprationComplete();
+                }
+            }, 1000);
+        }
+
+        function preprationComplete() {
+            document.getElementById('ieltsPhase').textContent = 'Preparation Complete - Ready to Speak';
+            document.getElementById('startSpeakBtn').disabled = false;
+            showStatus('success', 'Preparation time is up! Click "Start Speaking" to begin your 1-minute response.');
+        }
+
+        function startSpeaking() {
+            ieltsPhase = 'speak';
+            ieltsTimeLeft = 60;
+            document.getElementById('startSpeakBtn').disabled = true;
+            document.getElementById('ieltsPhase').textContent = 'Speaking Time - Recording Your Response';
+            document.getElementById('ieltsRecordingControls').style.display = 'block';
+
+            // Start recording automatically
+            startIELTSRecording();
+
+            showStatus('info', 'Speaking time started! You have 1 minute to give your response.');
+
+            ieltsTimer = setInterval(() => {
+                ieltsTimeLeft--;
+                const minutes = Math.floor(ieltsTimeLeft / 60);
+                const seconds = ieltsTimeLeft % 60;
+                document.getElementById('ieltsTimer').textContent =
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                if (ieltsTimeLeft <= 0) {
+                    clearInterval(ieltsTimer);
+                    speakingComplete();
+                }
+            }, 1000);
+        }
+
+        async function startIELTSRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        sampleRate: 16000,
+                        channelCount: 1,
+                        echoCancellation: true,
+                        noiseSuppression: true
+                    }
+                });
+
+                // Try WAV format first for Azure compatibility, fallback to WebM
+                let options;
+                if (MediaRecorder.isTypeSupported('audio/wav')) {
+                    options = { mimeType: 'audio/wav' };
+                } else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                    options = { mimeType: 'audio/webm;codecs=opus' };
+                } else {
+                    options = {}; // Use default
+                }
+
+                mediaRecorder = new MediaRecorder(stream, options);
+
+                audioChunks = [];
+                isRecording = true;
+
+                startAudioVisualization(stream, 'ielts');
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    processIELTSRecording();
+                };
+
+                mediaRecorder.start();
+                console.log('IELTS recording started');
+
+            } catch (error) {
+                console.error('Error starting IELTS recording:', error);
+                showStatus('error', 'Could not start recording. Please check microphone permissions.');
+            }
+        }
+
+        function speakingComplete() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                isRecording = false;
+            }
+
+            document.getElementById('ieltsPhase').textContent = 'Speaking Complete - Processing Results';
+            document.getElementById('finishIELTSBtn').style.display = 'inline-block';
+            showStatus('success', 'Speaking time complete! Click "Finish & Get Feedback" to see your results.');
+        }
+
+        async function processIELTSRecording() {
+            try {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                console.log('IELTS audio blob created, size:', audioBlob.size);
+
+                // For IELTS, we assess the overall speaking performance
+                const topicTitle = document.getElementById('ieltsTopicTitle').textContent;
+
+                // Create form data for upload
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'ielts_recording.webm');
+                formData.append('reference_text', topicTitle);
+                formData.append('practice_type', 'ielts');
+
+                // Check for auth token
+                const token = localStorage.getItem('auth_token');
+                if (!token) {
+                    showMockResults('ielts');
+                    return;
+                }
+
+                const response = await fetch('/api/speaking/assess-pronunciation', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const results = await response.json();
+                    console.log('IELTS assessment results:', results);
+                    displayResults(results, 'ielts');
+                } else {
+                    console.error('IELTS assessment failed:', response.status);
+                    showMockResults('ielts');
+                }
+
+            } catch (error) {
+                console.error('Error processing IELTS recording:', error);
+                showMockResults('ielts');
+            }
+        }
+
+        function finishIELTS() {
+            if (ieltsTimer) {
+                clearInterval(ieltsTimer);
+            }
+            // Results should already be displayed
+            showStatus('success', 'IELTS practice session complete! Review your feedback below.');
+        }
+
+        function newIELTSTopic() {
+            initializeIELTSPractice();
+            document.getElementById('resultsSection').classList.remove('active');
+        }
+
+        // Navigation functions
+        function backToSelector() {
+            // Reset all sections
+            document.querySelectorAll('.practice-area, .ielts-section, .results-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Stop any ongoing recording
+            if (isRecording && mediaRecorder) {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                isRecording = false;
+            }
+
+            // Clear any timers
+            if (ieltsTimer) {
+                clearInterval(ieltsTimer);
+            }
+
+            // Show selector
+            document.getElementById('practiceSelector').style.display = 'grid';
+
+            // Reset state
+            currentType = '';
+            currentIndex = 0;
+
+            showStatus('info', 'Select a practice type to begin your speaking practice session.');
+        }
+
+        function practiceAgain() {
+            if (currentType === 'ielts') {
+                newIELTSTopic();
+            } else {
+                currentIndex = 0;
+                initializePractice(currentType);
+                document.getElementById('resultsSection').classList.remove('active');
+            }
+        }
+
+        function showStatus(type, message) {
+            // Hide all status messages
+            document.querySelectorAll('.status-message').forEach(msg => {
+                msg.classList.remove('active');
+            });
+
+            // Show appropriate status message
+            const statusSelectors = ['#wordStatus', '#sentenceStatus', '#paragraphStatus', '#ieltsStatus'];
+            statusSelectors.forEach(selector => {
+                const element = document.querySelector(selector);
+                if (element) {
+                    element.className = `status-message ${type} active`;
+                    element.textContent = message;
+                }
+            });
+        }
+
+        // Replay functionality
+        function replayRecording() {
+            if (!lastRecordingBlob) {
+                showStatus('error', 'No recording available to replay.');
+                return;
+            }
+
+            try {
+                // Create audio URL from blob
+                const audioUrl = URL.createObjectURL(lastRecordingBlob);
+
+                // Create audio element
+                const audio = new Audio(audioUrl);
+
+                // Update button state
+                const replayBtn = document.getElementById('replayBtn');
+                if (replayBtn) {
+                    replayBtn.disabled = true;
+                    replayBtn.innerHTML = '<i class="bi bi-pause-circle"></i> Playing...';
+                }
+
+                // Play the audio
+                audio.play().then(() => {
+                    console.log('Replaying recorded audio');
+                }).catch(error => {
+                    console.error('Error playing audio:', error);
+                    showStatus('error', 'Could not play the recording.');
+                });
+
+                // Handle audio end
+                audio.onended = () => {
+                    // Restore button state
+                    if (replayBtn) {
+                        replayBtn.disabled = false;
+                        replayBtn.innerHTML = '<i class="bi bi-play-circle"></i> Replay Recording';
+                    }
+
+                    // Clean up URL
+                    URL.revokeObjectURL(audioUrl);
+                };
+
+                // Handle audio error
+                audio.onerror = () => {
+                    console.error('Audio playback error');
+                    showStatus('error', 'Error playing the recording.');
+
+                    // Restore button state
+                    if (replayBtn) {
+                        replayBtn.disabled = false;
+                        replayBtn.innerHTML = '<i class="bi bi-play-circle"></i> Replay Recording';
+                    }
+
+                    // Clean up URL
+                    URL.revokeObjectURL(audioUrl);
+                };
+
+            } catch (error) {
+                console.error('Replay error:', error);
+                showStatus('error', 'Could not replay the recording.');
+
+                // Restore button state
+                const replayBtn = document.getElementById('replayBtn');
+                if (replayBtn) {
+                    replayBtn.disabled = false;
+                    replayBtn.innerHTML = '<i class="bi bi-play-circle"></i> Replay Recording';
+                }
+            }
+        }
+
+        // Initialize on page load
+        showStatus('info', 'Welcome to Speaking Practice! Select a practice type to begin.');
+    </script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+{
+  "beginner": [
+    {
+      "content_text": "Hello, my name is Alex and I am twenty years old. I come from a small city in Canada where I live with my parents and my younger sister. I am currently studying computer science at university because I love technology and want to create useful applications. In my free time, I enjoy playing basketball, reading books, and spending time with my friends. After graduation, I hope to work for a technology company and travel to different countries to learn about other cultures.",
+      "context_hint": "Self-introduction paragraph covering personal background and future goals"
+    },
+    {
+      "content_text": "My favorite hobby is cooking because it allows me to be creative and share delicious food with my family and friends. I started learning to cook when I was fifteen years old by watching my grandmother in the kitchen. She taught me many traditional recipes from our culture. Now I can prepare many different dishes, including pasta, stir-fry, and various desserts. Cooking helps me relax after a busy day at school, and I always feel proud when people enjoy the meals I prepare.",
+      "context_hint": "Describing a hobby and explaining why it's meaningful"
+    },
+    {
+      "content_text": "Last summer, I took a trip to Japan with my best friend. It was my first time visiting another country, and I was very excited but also nervous. We visited Tokyo, Kyoto, and Osaka during our two-week stay. The food was amazing, especially the sushi and ramen. The people were very kind and helpful, even though we didn't speak much Japanese. We visited many temples, tried traditional tea ceremonies, and learned about Japanese culture. This trip made me want to travel more and learn about different countries around the world.",
+      "context_hint": "Narrating a travel experience and its impact"
+    }
+  ],
+  "intermediate": [
+    {
+      "content_text": "The rapid advancement of technology has fundamentally transformed the way we communicate, work, and learn in the modern world. Social media platforms have connected people across vast distances, enabling instant communication and the sharing of ideas on a global scale. However, this digital revolution has also created new challenges, including concerns about privacy, misinformation, and the potential for technology addiction. As we continue to integrate technology into our daily lives, it is essential to find a balance between embracing innovation and maintaining meaningful human connections. The key lies in using technology as a tool to enhance our lives rather than allowing it to dominate them.",
+      "context_hint": "Analyzing the impact of technology on society with balanced perspective"
+    },
+    {
+      "content_text": "Climate change represents one of the most pressing challenges facing humanity today, requiring immediate and coordinated global action. The scientific evidence overwhelmingly demonstrates that human activities, particularly the burning of fossil fuels, are the primary drivers of rising global temperatures. The consequences are already visible in the form of extreme weather events, rising sea levels, and disruptions to ecosystems worldwide. Addressing this crisis will require a combination of technological innovation, policy changes, and individual behavioral modifications. Governments, businesses, and citizens must work together to transition to renewable energy sources, implement sustainable practices, and reduce greenhouse gas emissions to ensure a livable planet for future generations.",
+      "context_hint": "Discussing environmental issues and proposing solutions"
+    },
+    {
+      "content_text": "The value of higher education has become a topic of intense debate in recent years, with rising costs and changing job market demands prompting many to question its worth. While traditional university degrees have long been considered essential for career success, the emergence of alternative educational pathways, such as online courses, vocational training, and entrepreneurship, has challenged this assumption. However, universities continue to offer unique benefits, including critical thinking skills, research opportunities, and networking possibilities that extend far beyond job preparation. The key is not whether higher education is valuable, but rather how institutions can adapt to meet the evolving needs of students and society in the 21st century.",
+      "context_hint": "Examining contemporary issues in education and its value"
+    }
+  ],
+  "advanced": [
+    {
+      "content_text": "The epistemological foundations of scientific inquiry have undergone significant transformation since the Enlightenment, reflecting evolving understandings of knowledge, objectivity, and the relationship between observer and observed phenomena. Traditional positivist approaches, which emphasized empirical observation and quantitative measurement as the primary means of understanding reality, have been increasingly challenged by post-positivist and constructivist paradigms that acknowledge the inherent subjectivity and contextual nature of knowledge production. This paradigmatic shift has profound implications for how we conceptualize scientific methodology, interpret research findings, and navigate the complex interplay between scientific authority and democratic decision-making in contemporary society. As we grapple with unprecedented global challenges that require evidence-based solutions, the need for sophisticated epistemological frameworks that can accommodate both scientific rigor and social complexity becomes increasingly urgent.",
+      "context_hint": "Exploring philosophical aspects of scientific knowledge and methodology"
+    },
+    {
+      "content_text": "The phenomenon of cultural globalization presents a fascinating paradox wherein increased interconnectedness simultaneously facilitates both cultural homogenization and the preservation of local distinctiveness. While transnational flows of information, capital, and people have undoubtedly contributed to the spread of dominant cultural forms—particularly those emanating from Western, and specifically American, sources—they have also created new opportunities for marginalized communities to assert their cultural identities and gain international recognition. This dialectical process manifests differently across various contexts, with some communities embracing hybrid cultural forms that blend global and local elements, while others retreat into more insular practices as a form of resistance to external influences. Understanding these complex dynamics requires sophisticated analytical frameworks that can account for the multidirectional nature of cultural exchange and the agency of local actors in shaping globalization processes.",
+      "context_hint": "Analyzing complex cultural and social phenomena in globalization"
+    },
+    {
+      "content_text": "The emergence of artificial intelligence as a transformative force in contemporary society necessitates a fundamental reconsideration of traditional assumptions about human cognition, labor, and social organization. As machine learning algorithms demonstrate increasingly sophisticated capabilities in domains previously considered uniquely human—including creative expression, complex reasoning, and emotional intelligence—we are compelled to reexamine the boundaries between human and machine intelligence. This technological revolution raises profound questions about the future of work, the nature of human value, and the ethical implications of creating artificial systems that may eventually surpass human cognitive abilities. The challenge for policymakers, educators, and society at large is to develop frameworks for navigating this transition that maximize the benefits of AI while mitigating potential risks such as technological unemployment, algorithmic bias, and the concentration of power in the hands of a technological elite.",
+      "context_hint": "Examining the societal implications of artificial intelligence and technological advancement"
+    }
+  ]
+}

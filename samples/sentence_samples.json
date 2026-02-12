@@ -1,0 +1,128 @@
+{
+  "beginner": [
+    {
+      "content_text": "Hello, my name is Sarah and I am from Canada.",
+      "context_hint": "Basic self-introduction for meeting new people"
+    },
+    {
+      "content_text": "I like to read books and watch movies in my free time.",
+      "context_hint": "Talking about hobbies and interests"
+    },
+    {
+      "content_text": "Could you please tell me where the library is?",
+      "context_hint": "Asking for directions politely"
+    },
+    {
+      "content_text": "I would like to order a coffee and a sandwich, please.",
+      "context_hint": "Ordering food and drinks at a restaurant"
+    },
+    {
+      "content_text": "The weather is beautiful today, isn't it?",
+      "context_hint": "Making small talk about the weather"
+    },
+    {
+      "content_text": "I need to go to the doctor because I feel sick.",
+      "context_hint": "Explaining health problems"
+    },
+    {
+      "content_text": "My family lives in a small town near the mountains.",
+      "context_hint": "Describing where your family lives"
+    },
+    {
+      "content_text": "I study English because I want to travel the world.",
+      "context_hint": "Explaining reasons for learning English"
+    },
+    {
+      "content_text": "Can you help me find my phone? I think I lost it.",
+      "context_hint": "Asking for help when you lose something"
+    },
+    {
+      "content_text": "Thank you very much for your help. I appreciate it.",
+      "context_hint": "Expressing gratitude politely"
+    }
+  ],
+  "intermediate": [
+    {
+      "content_text": "Although technology has many benefits, it also creates some challenges for society.",
+      "context_hint": "Discussing both positive and negative aspects of technology"
+    },
+    {
+      "content_text": "I believe that education is the key to solving many global problems.",
+      "context_hint": "Expressing opinions about education and its importance"
+    },
+    {
+      "content_text": "If I had more time, I would learn a new language and travel more often.",
+      "context_hint": "Talking about hypothetical situations and desires"
+    },
+    {
+      "content_text": "The company has been developing new products to meet customer demands.",
+      "context_hint": "Discussing business strategies and market responses"
+    },
+    {
+      "content_text": "Scientists are conducting research to find solutions for climate change.",
+      "context_hint": "Talking about scientific research and environmental issues"
+    },
+    {
+      "content_text": "Young people today face different challenges than previous generations did.",
+      "context_hint": "Comparing different generations and their experiences"
+    },
+    {
+      "content_text": "The government should invest more money in renewable energy projects.",
+      "context_hint": "Making suggestions about government policy"
+    },
+    {
+      "content_text": "Cultural differences can sometimes lead to misunderstandings between people.",
+      "context_hint": "Discussing cultural diversity and communication challenges"
+    },
+    {
+      "content_text": "Online learning has become increasingly popular since the pandemic began.",
+      "context_hint": "Talking about changes in education due to recent events"
+    },
+    {
+      "content_text": "I'm considering changing my career because I want new challenges.",
+      "context_hint": "Discussing career decisions and personal growth"
+    }
+  ],
+  "advanced": [
+    {
+      "content_text": "The implementation of artificial intelligence in healthcare requires careful consideration of ethical implications.",
+      "context_hint": "Discussing complex technological and ethical issues"
+    },
+    {
+      "content_text": "Multinational corporations must navigate diverse regulatory frameworks while maintaining operational efficiency.",
+      "context_hint": "Analyzing business challenges in global markets"
+    },
+    {
+      "content_text": "The paradigm shift towards sustainable development necessitates interdisciplinary collaboration.",
+      "context_hint": "Discussing environmental policy and academic cooperation"
+    },
+    {
+      "content_text": "Socioeconomic disparities significantly influence educational outcomes and long-term career prospects.",
+      "context_hint": "Analyzing social inequality and its effects on education"
+    },
+    {
+      "content_text": "The philosophical underpinnings of democracy continue to evolve in response to contemporary challenges.",
+      "context_hint": "Discussing political theory and modern governance"
+    },
+    {
+      "content_text": "Neuroplasticity research has revolutionized our understanding of cognitive development throughout the lifespan.",
+      "context_hint": "Explaining scientific breakthroughs in neuroscience"
+    },
+    {
+      "content_text": "The intersection of globalization and cultural preservation presents both opportunities and dilemmas.",
+      "context_hint": "Analyzing the relationship between global trends and local culture"
+    },
+    {
+      "content_text": "Quantum computing represents a fundamental departure from classical computational paradigms.",
+      "context_hint": "Discussing advanced technology and scientific innovation"
+    },
+    {
+      "content_text": "The epistemological foundations of scientific inquiry remain subjects of ongoing philosophical debate.",
+      "context_hint": "Exploring the philosophy of science and knowledge"
+    },
+    {
+      "content_text": "Biodiversity conservation strategies must balance ecological integrity with human developmental needs.",
+      "context_hint": "Discussing environmental protection and sustainable development"
+    }
+  ]
+}

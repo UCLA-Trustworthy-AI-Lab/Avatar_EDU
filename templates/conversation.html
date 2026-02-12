@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avatar Conversation - Language Arts Agent</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        
+        .avatar-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .avatar-video {
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            border-radius: 15px;
+            background: #f8f9fa;
+            border: 3px solid #6f42c1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .avatar-placeholder {
+            text-align: center;
+            color: #6c757d;
+        }
+        
+        .conversation-controls {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .voice-button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .voice-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .voice-button.recording {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .conversation-log {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 80%;
+        }
+        
+        .message.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+        
+        .message.avatar {
+            background: #e9ecef;
+            color: #333;
+        }
+        
+        .status-indicator {
+            text-align: center;
+            padding: 10px;
+            font-weight: 500;
+            color: #6c757d;
+        }
+        
+        .status-indicator.listening {
+            color: #28a745;
+        }
+        
+        .status-indicator.speaking {
+            color: #6f42c1;
+        }
+        
+        .streaming-options {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .nav-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="navbar navbar-expand-lg navbar-light nav-header">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-person-video3 text-primary"></i>
+                Avatar Conversation
+            </a>
+            <div class="navbar-nav ms-auto">
+                <div class="d-flex gap-2 align-items-center">
+                    <span class="text-muted">
+                        <i class="bi bi-person-circle"></i>
+                        <span id="userInfo">Loading...</span>
+                    </span>
+                    <a href="/" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-house"></i> Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Avatar Video Area -->
+            <div class="col-lg-6 mb-4">
+                <div class="avatar-container p-4">
+                    <h4 class="text-center mb-4">
+                        <i class="bi bi-robot text-primary"></i>
+                        AI Avatar Teacher
+                    </h4>
+                    
+                    <!-- Conversation Topic Selection -->
+                    <div class="streaming-options">
+                        <h6><i class="bi bi-chat-square"></i> Conversation Topic</h6>
+                        <div class="row">
+                            <div class="col-12">
+                                <select class="form-select" id="conversationTopic">
+                                    <option value="general">General Conversation</option>
+                                    <option value="daily_life">Daily Life & Experiences</option>
+                                    <option value="academic">Academic & Studies</option>
+                                    <option value="business">Business & Professional</option>
+                                    <option value="travel">Travel & Culture</option>
+                                </select>
+                            </div>
+                        </div>
+                        <small class="text-muted d-block mt-2">Choose a topic that interests you most</small>
+                    </div>
+                    
+                    <!-- Streaming Platform Selection -->
+                    <div class="streaming-options">
+                        <h6><i class="bi bi-gear"></i> Streaming Platform</h6>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="streamingPlatform" id="heygen" value="heygen" checked>
+                            <label class="btn btn-outline-primary" for="heygen">
+                                <i class="bi bi-camera-video"></i> Avatar Video
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="streamingPlatform" id="textOnly" value="text">
+                            <label class="btn btn-outline-info" for="textOnly">
+                                <i class="bi bi-chat-text"></i> Text Only
+                            </label>
+                        </div>
+                        <small class="text-muted d-block mt-2">Avatar video provides the most immersive experience</small>
+                    </div>
+                    
+                    <!-- Avatar Display Area -->
+                    <div class="avatar-video mx-auto">
+                        <div class="avatar-placeholder" id="avatarPlaceholder">
+                            <i class="bi bi-person-video3" style="font-size: 4rem; color: #6f42c1;"></i>
+                            <h6 class="mt-3">Avatar Ready</h6>
+                            <p class="small">Click "Start Conversation" to begin</p>
+                        </div>
+                        <video id="avatarVideo" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 12px;"></video>
+                    </div>
+                    
+                    <!-- Avatar Status -->
+                    <div class="status-indicator" id="avatarStatus">
+                        Ready to talk
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Conversation Controls -->
+            <div class="col-lg-6">
+                <div class="conversation-controls">
+                    <h4 class="mb-4">
+                        <i class="bi bi-chat-dots text-success"></i>
+                        Conversation
+                    </h4>
+                    
+                    <!-- Voice Controls -->
+                    <div class="text-center mb-4">
+                        <button class="voice-button" id="voiceButton" title="Click to speak">
+                            <i class="bi bi-mic"></i>
+                        </button>
+                        
+                        <!-- Microphone Status Indicator -->
+                        <div class="mt-2 mb-3">
+                            <small id="microphoneStatusText" class="text-muted">
+                                <i class="bi bi-gear-fill" id="micStatusIcon"></i>
+                                <span id="micStatusLabel">Checking microphone...</span>
+                            </small>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <button class="btn btn-primary" id="startConversation">
+                                <i class="bi bi-play-circle"></i> Start Conversation
+                            </button>
+                            <button class="btn btn-outline-secondary ms-2" id="endConversation" disabled>
+                                <i class="bi bi-stop-circle"></i> End
+                            </button>
+                            <button class="btn btn-outline-warning ms-2" id="resetConversation" title="Reset conversation memory">
+                                <i class="bi bi-arrow-clockwise"></i> Reset Memory
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Text Input Alternative -->
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="textInput" placeholder="Or type your message here..." disabled>
+                        <button class="btn btn-outline-primary" id="sendTextButton" disabled>
+                            <i class="bi bi-send"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Conversation Log -->
+                    <div class="conversation-log" id="conversationLog">
+                        <div class="text-center text-muted">
+                            <i class="bi bi-chat-square-dots" style="font-size: 2rem;"></i>
+                            <p class="mt-2">Conversation will appear here...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Memory Board Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="avatar-container p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>
+                            <i class="bi bi-brain text-primary"></i>
+                            Your Learning Memory Board
+                        </h5>
+                        <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#memoryBoardCollapse">
+                            <i class="bi bi-eye"></i> Show/Hide
+                        </button>
+                    </div>
+                    <p class="text-muted small mb-3">
+                        The avatar remembers your learning patterns from all modules and uses them to personalize conversations.
+                    </p>
+
+                    <div class="collapse show" id="memoryBoardCollapse">
+                        <div id="memoryBoardLoading" class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Loading your learning history...</p>
+                        </div>
+
+                        <div id="memoryBoardData" style="display: none;">
+                            <!-- Reading Memory -->
+                            <div class="mb-3">
+                                <h6 class="text-primary">
+                                    <i class="bi bi-book"></i> Reading Module
+                                </h6>
+                                <div id="readingMemory" class="small">
+                                    <p class="text-muted">No data yet</p>
+                                </div>
+                            </div>
+
+                            <!-- Listening Memory -->
+                            <div class="mb-3">
+                                <h6 class="text-info">
+                                    <i class="bi bi-headphones"></i> Listening Module
+                                </h6>
+                                <div id="listeningMemory" class="small">
+                                    <p class="text-muted">No data yet</p>
+                                </div>
+                            </div>
+
+                            <!-- Speaking Memory -->
+                            <div class="mb-3">
+                                <h6 class="text-success">
+                                    <i class="bi bi-mic"></i> Speaking Module
+                                </h6>
+                                <div id="speakingMemory" class="small">
+                                    <p class="text-muted">No data yet</p>
+                                </div>
+                            </div>
+
+                            <!-- Writing Memory -->
+                            <div class="mb-3">
+                                <h6 class="text-warning">
+                                    <i class="bi bi-pencil"></i> Writing Module
+                                </h6>
+                                <div id="writingMemory" class="small">
+                                    <p class="text-muted">No data yet</p>
+                                </div>
+                            </div>
+
+                            <!-- Conversation Memory -->
+                            <div class="mb-3">
+                                <h6 class="text-danger">
+                                    <i class="bi bi-chat-dots"></i> Conversation Module
+                                </h6>
+                                <div id="conversationMemory" class="small">
+                                    <p class="text-muted">No data yet</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Info -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="avatar-container p-4">
+                    <h5><i class="bi bi-info-circle text-info"></i> Avatar Conversation Features</h5>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h6>Streaming Technology</h6>
+                            <ul class="list-unstyled small">
+                                <li><i class="bi bi-check-circle text-success"></i> Real-time avatar video</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Natural lip-sync</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Facial expressions</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Voice Recognition</h6>
+                            <ul class="list-unstyled small">
+                                <li><i class="bi bi-check-circle text-success"></i> Speech-to-text</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Pronunciation analysis</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Accent adaptation</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>AI Intelligence</h6>
+                            <ul class="list-unstyled small">
+                                <li><i class="bi bi-check-circle text-success"></i> Natural conversations</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Context awareness</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Learning adaptation</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Learning Focus</h6>
+                            <ul class="list-unstyled small">
+                                <li><i class="bi bi-check-circle text-success"></i> Conversation skills</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Fluency building</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Confidence boost</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        class AvatarConversation {
+            constructor() {
+                this.isRecording = false;
+                this.isConversationActive = false;
+                this.currentPlatform = 'heygen';
+                this.currentTopic = 'general';
+                this.mediaRecorder = null;
+                this.audioChunks = [];
+                this.microphoneAvailable = false;
+                this.microphonePermission = 'unknown'; // 'granted', 'denied', 'prompt', 'unknown'
+                
+                // Streaming session data
+                this.streamingSessionId = null;
+                this.streamingSessionKey = null;
+                this.streamingToken = null;
+                this.avatarVideoElement = null;
+                
+                this.init();
+            }
+            
+            async init() {
+                this.checkAuthentication();
+                await this.checkMicrophoneAvailability();
+                this.bindEvents();
+                this.updateUserInfo();
+                this.updateVoiceButtonState();
+                await this.loadMemoryBoard();
+            }
+            
+            checkAuthentication() {
+                const token = localStorage.getItem('auth_token');
+                if (!token) {
+                    window.location.href = '/';
+                    return false;
+                }
+                return true;
+            }
+            
+            updateUserInfo() {
+                const username = localStorage.getItem('username') || 'Student';
+                document.getElementById('userInfo').textContent = username;
+            }
+
+            async loadMemoryBoard() {
+                try {
+                    const token = localStorage.getItem('auth_token');
+                    const response = await fetch('/api/memory/board', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to load memory board');
+                    }
+
+                    const data = await response.json();
+                    this.displayMemoryBoard(data);
+                } catch (error) {
+                    console.error('Error loading memory board:', error);
+                    document.getElementById('memoryBoardLoading').innerHTML = `
+                        <p class="text-muted">
+                            <i class="bi bi-info-circle"></i>
+                            Memory board will be available after you complete practice sessions in different modules.
+                        </p>
+                    `;
+                }
+            }
+
+            displayMemoryBoard(data) {
+                const memoryData = data.memory_board || {};
+
+                // Hide loading, show data
+                document.getElementById('memoryBoardLoading').style.display = 'none';
+                document.getElementById('memoryBoardData').style.display = 'block';
+
+                // Reading Memory
+                const readingMem = memoryData.reading_memory || {};
+                if (readingMem.summary) {
+                    document.getElementById('readingMemory').innerHTML = `
+                        <p><strong>Summary:</strong> ${readingMem.summary}</p>
+                        ${readingMem.vocabulary_gaps && readingMem.vocabulary_gaps.length > 0 ? `
+                            <p><strong>Vocabulary gaps:</strong> ${readingMem.vocabulary_gaps.slice(0, 5).map(v => v.word).join(', ')}</p>
+                        ` : ''}
+                        ${readingMem.comprehension_weaknesses && readingMem.comprehension_weaknesses.length > 0 ? `
+                            <p><strong>Comprehension weaknesses:</strong> ${readingMem.comprehension_weaknesses.map(w => w.skill).join(', ')}</p>
+                        ` : ''}
+                    `;
+                }
+
+                // Listening Memory
+                const listeningMem = memoryData.listening_memory || {};
+                if (listeningMem.summary) {
+                    document.getElementById('listeningMemory').innerHTML = `
+                        <p><strong>Summary:</strong> ${listeningMem.summary}</p>
+                        ${listeningMem.comprehension_weaknesses && listeningMem.comprehension_weaknesses.length > 0 ? `
+                            <p><strong>Comprehension weaknesses:</strong> ${listeningMem.comprehension_weaknesses.map(w => w.skill).join(', ')}</p>
+                        ` : ''}
+                    `;
+                }
+
+                // Speaking Memory
+                const speakingMem = memoryData.speaking_memory || {};
+                if (speakingMem.summary) {
+                    document.getElementById('speakingMemory').innerHTML = `
+                        <p><strong>Summary:</strong> ${speakingMem.summary}</p>
+                        ${speakingMem.chronic_pronunciation_errors && speakingMem.chronic_pronunciation_errors.length > 0 ? `
+                            <p><strong>Pronunciation errors:</strong> ${speakingMem.chronic_pronunciation_errors.slice(0, 5).map(e => e.word).join(', ')}</p>
+                        ` : ''}
+                        ${speakingMem.problem_phonemes && speakingMem.problem_phonemes.length > 0 ? `
+                            <p><strong>Problem sounds:</strong> ${speakingMem.problem_phonemes.slice(0, 3).map(p => p.phoneme).join(', ')}</p>
+                        ` : ''}
+                    `;
+                }
+
+                // Writing Memory
+                const writingMem = memoryData.writing_memory || {};
+                if (writingMem.summary) {
+                    document.getElementById('writingMemory').innerHTML = `
+                        <p><strong>Summary:</strong> ${writingMem.summary}</p>
+                        ${writingMem.average_score ? `
+                            <p><strong>Average score:</strong> ${writingMem.average_score}/100</p>
+                        ` : ''}
+                        ${writingMem.chronic_grammar_errors && writingMem.chronic_grammar_errors.length > 0 ? `
+                            <p><strong>Grammar errors:</strong> ${writingMem.chronic_grammar_errors.slice(0, 3).map(e => e.error_type).join(', ')}</p>
+                        ` : ''}
+                    `;
+                }
+
+                // Conversation Memory
+                const convMem = memoryData.conversation_memory || {};
+                if (convMem.summary) {
+                    document.getElementById('conversationMemory').innerHTML = `
+                        <p><strong>Summary:</strong> ${convMem.summary}</p>
+                        ${convMem.chronic_grammar_errors && convMem.chronic_grammar_errors.length > 0 ? `
+                            <p><strong>Grammar errors:</strong> ${convMem.chronic_grammar_errors.slice(0, 3).map(e => e.error_type).join(', ')}</p>
+                        ` : ''}
+                        ${convMem.vocabulary_gaps && convMem.vocabulary_gaps.length > 0 ? `
+                            <p><strong>Vocabulary gaps:</strong> ${convMem.vocabulary_gaps.slice(0, 5).map(v => v.word).join(', ')}</p>
+                        ` : ''}
+                    `;
+                }
+            }
+
+            async checkMicrophoneAvailability() {
+                try {
+                    // Check if navigator.mediaDevices is supported
+                    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                        console.warn('MediaDevices API not supported');
+                        this.microphoneAvailable = false;
+                        this.microphonePermission = 'not_supported';
+                        return;
+                    }
+                    
+                    // Check microphone permission status
+                    if (navigator.permissions && navigator.permissions.query) {
+                        try {
+                            const permission = await navigator.permissions.query({ name: 'microphone' });
+                            this.microphonePermission = permission.state;
+                            
+                            // Listen for permission changes
+                            permission.onchange = () => {
+                                this.microphonePermission = permission.state;
+                                this.updateVoiceButtonState();
+                            };
+                        } catch (e) {
+                            console.warn('Could not query microphone permission:', e);
+                        }
+                    }
+                    
+                    // Try to enumerate audio input devices
+                    try {
+                        const devices = await navigator.mediaDevices.enumerateDevices();
+                        const audioInputs = devices.filter(device => device.kind === 'audioinput');
+                        this.microphoneAvailable = audioInputs.length > 0;
+                        
+                        if (audioInputs.length === 0) {
+                            console.warn('No audio input devices found');
+                        } else {
+                            console.log(`Found ${audioInputs.length} audio input device(s)`);
+                        }
+                    } catch (e) {
+                        console.warn('Could not enumerate devices:', e);
+                        // Assume microphone might be available if we can't check
+                        this.microphoneAvailable = true;
+                    }
+                    
+                } catch (error) {
+                    console.error('Error checking microphone availability:', error);
+                    this.microphoneAvailable = false;
+                }
+            }
+            
+            updateVoiceButtonState() {
+                const voiceBtn = document.getElementById('voiceButton');
+                const micStatusIcon = document.getElementById('micStatusIcon');
+                const micStatusLabel = document.getElementById('micStatusLabel');
+                const micStatusText = document.getElementById('microphoneStatusText');
+                
+                if (!this.microphoneAvailable) {
+                    voiceBtn.style.opacity = '0.5';
+                    voiceBtn.style.cursor = 'not-allowed';
+                    voiceBtn.title = 'Microphone not available - Use text input instead';
+                    
+                    if (micStatusIcon) {
+                        micStatusIcon.className = 'bi bi-mic-slash text-warning';
+                        micStatusLabel.textContent = 'No microphone detected';
+                        micStatusText.className = 'text-warning';
+                    }
+                } else if (this.microphonePermission === 'denied') {
+                    voiceBtn.style.opacity = '0.7';
+                    voiceBtn.style.cursor = 'pointer';
+                    voiceBtn.title = 'Microphone access denied - Click to try again or use text input';
+                    
+                    if (micStatusIcon) {
+                        micStatusIcon.className = 'bi bi-exclamation-triangle text-warning';
+                        micStatusLabel.textContent = 'Microphone access denied';
+                        micStatusText.className = 'text-warning';
+                    }
+                } else if (this.microphonePermission === 'not_supported') {
+                    voiceBtn.style.opacity = '0.5';
+                    voiceBtn.style.cursor = 'not-allowed';
+                    voiceBtn.title = 'Microphone not supported in this browser - Use text input instead';
+                    
+                    if (micStatusIcon) {
+                        micStatusIcon.className = 'bi bi-x-circle text-secondary';
+                        micStatusLabel.textContent = 'Microphone not supported';
+                        micStatusText.className = 'text-secondary';
+                    }
+                } else if (this.microphonePermission === 'granted') {
+                    voiceBtn.style.opacity = '1';
+                    voiceBtn.style.cursor = 'pointer';
+                    voiceBtn.title = 'Click to speak';
+                    
+                    if (micStatusIcon) {
+                        micStatusIcon.className = 'bi bi-check-circle text-success';
+                        micStatusLabel.textContent = 'Microphone ready';
+                        micStatusText.className = 'text-success';
+                    }
+                } else {
+                    voiceBtn.style.opacity = '1';
+                    voiceBtn.style.cursor = 'pointer';
+                    voiceBtn.title = 'Click to speak';
+                    
+                    if (micStatusIcon) {
+                        micStatusIcon.className = 'bi bi-mic text-primary';
+                        micStatusLabel.textContent = 'Microphone available';
+                        micStatusText.className = 'text-muted';
+                    }
+                }
+            }
+            
+            bindEvents() {
+                // Platform selection
+                document.querySelectorAll('input[name="streamingPlatform"]').forEach(radio => {
+                    radio.addEventListener('change', () => {
+                        this.currentPlatform = radio.value;
+                        this.updateAvatarDisplay();
+                    });
+                });
+                
+                // Topic selection
+                document.getElementById('conversationTopic').addEventListener('change', (e) => {
+                    this.currentTopic = e.target.value;
+                });
+                
+                // Conversation controls
+                document.getElementById('startConversation').addEventListener('click', () => {
+                    this.startConversation();
+                });
+                
+                document.getElementById('endConversation').addEventListener('click', () => {
+                    this.endConversation();
+                });
+
+                document.getElementById('resetConversation').addEventListener('click', () => {
+                    this.resetConversation();
+                });
+
+                // Voice controls
+                document.getElementById('voiceButton').addEventListener('click', () => {
+                    this.toggleRecording();
+                });
+                
+                // Text input
+                document.getElementById('sendTextButton').addEventListener('click', () => {
+                    this.sendTextMessage();
+                });
+                
+                document.getElementById('textInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.sendTextMessage();
+                    }
+                });
+            }
+            
+            updateAvatarDisplay() {
+                const placeholder = document.getElementById('avatarPlaceholder');
+                const video = document.getElementById('avatarVideo');
+                
+                switch(this.currentPlatform) {
+                    case 'heygen':
+                        placeholder.innerHTML = `
+                            <i class="bi bi-camera-video" style="font-size: 4rem; color: #6f42c1;"></i>
+                            <h6 class="mt-3">HeyGen Avatar</h6>
+                            <p class="small">Professional AI avatar streaming</p>
+                        `;
+                        break;
+                    case 'custom':
+                        placeholder.innerHTML = `
+                            <i class="bi bi-person-gear" style="font-size: 4rem; color: #6f42c1;"></i>
+                            <h6 class="mt-3">Custom Avatar</h6>
+                            <p class="small">Personalized avatar experience</p>
+                        `;
+                        break;
+                    case 'text':
+                        placeholder.innerHTML = `
+                            <i class="bi bi-chat-text" style="font-size: 4rem; color: #6f42c1;"></i>
+                            <h6 class="mt-3">Text Mode</h6>
+                            <p class="small">Text-based conversation</p>
+                        `;
+                        break;
+                }
+            }
+            
+            async startConversation() {
+                try {
+                    document.getElementById('avatarStatus').textContent = 'Starting conversation...';
+                    
+                    // Check microphone availability again
+                    await this.checkMicrophoneAvailability();
+                    
+                    // Start streaming conversation session
+                    const response = await fetch('/api/conversation/streaming/start', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            topic: this.currentTopic,
+                            platform: this.currentPlatform
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (!data.success) {
+                        throw new Error(data.error || 'Failed to start conversation');
+                    }
+                    
+                    // Store session data
+                    this.streamingSessionId = data.sessionId;
+                    this.streamingSessionKey = data.sessionKey;
+                    this.streamingToken = data.token;
+                    
+                    this.isConversationActive = true;
+                    
+                    // Update UI
+                    document.getElementById('startConversation').disabled = true;
+                    document.getElementById('endConversation').disabled = false;
+                    document.getElementById('textInput').disabled = false;
+                    document.getElementById('sendTextButton').disabled = false;
+                    document.getElementById('avatarStatus').textContent = 'Conversation active';
+                    document.getElementById('avatarStatus').className = 'status-indicator speaking';
+                    
+                    // Update voice button state
+                    this.updateVoiceButtonState();
+                    
+                    // Clear conversation log
+                    document.getElementById('conversationLog').innerHTML = '';
+                    
+                    // Initialize avatar streaming if using HeyGen
+                    if (this.currentPlatform === 'heygen' && data.streamUrl) {
+                        await this.initializeAvatarVideo(data);
+                    }
+                    
+                    // Add welcome message
+                    this.addMessage(data.welcomeMessage, 'avatar');
+                    
+                    // Show instructions based on topic
+                    const topicInstructions = data.instructions;
+                    if (topicInstructions) {
+                        setTimeout(() => {
+                            this.addMessage(`💡 ${topicInstructions.topic_focus}`, 'avatar');
+                            this.addMessage(`✨ ${topicInstructions.encouragement}`, 'avatar');
+                        }, 1000);
+                    }
+                    
+                    // Show microphone status if there are issues
+                    if (!this.microphoneAvailable) {
+                        this.showMicrophoneMessage('No microphone detected. You can still have a great conversation using text input!', 'info');
+                    } else if (this.microphonePermission === 'denied') {
+                        this.showMicrophoneMessage('Microphone access was denied. You can enable it in browser settings or continue with text input.', 'warning');
+                    } else if (this.microphonePermission === 'not_supported') {
+                        this.showMicrophoneMessage('Your browser doesn\'t support microphone recording. Text input works perfectly!', 'info');
+                    } else if (this.microphoneAvailable && this.microphonePermission === 'granted') {
+                        this.showMicrophoneMessage('Microphone is ready! Click the microphone button to speak or use text input.', 'success');
+                    }
+                    
+                } catch (error) {
+                    console.error('Error starting conversation:', error);
+                    document.getElementById('avatarStatus').textContent = 'Failed to start';
+                    this.showMicrophoneMessage(`Failed to start conversation: ${error.message}`, 'error');
+                }
+            }
+            
+            async endConversation() {
+                try {
+                    document.getElementById('avatarStatus').textContent = 'Ending conversation...';
+                    
+                    // Stop streaming session if active
+                    if (this.streamingSessionKey) {
+                        const response = await fetch('/api/conversation/streaming/stop', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                sessionKey: this.streamingSessionKey
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success && data.analytics) {
+                            // Show session analytics
+                            this.showSessionAnalytics(data.analytics);
+                        }
+                    }
+                    
+                    this.isConversationActive = false;
+                    this.isRecording = false;
+                    
+                    // Reset session data
+                    this.streamingSessionId = null;
+                    this.streamingSessionKey = null;
+                    this.streamingToken = null;
+                    
+                    // Update UI
+                    document.getElementById('startConversation').disabled = false;
+                    document.getElementById('endConversation').disabled = true;
+                    document.getElementById('textInput').disabled = true;
+                    document.getElementById('sendTextButton').disabled = true;
+                    document.getElementById('avatarStatus').textContent = 'Conversation ended';
+                    document.getElementById('avatarStatus').className = 'status-indicator';
+                    
+                    // Reset voice button
+                    const voiceBtn = document.getElementById('voiceButton');
+                    voiceBtn.classList.remove('recording');
+                    voiceBtn.innerHTML = '<i class="bi bi-mic"></i>';
+                    
+                    // Reset avatar display
+                    const videoElement = document.getElementById('avatarVideo');
+                    const placeholder = document.getElementById('avatarPlaceholder');
+                    videoElement.style.display = 'none';
+                    placeholder.style.display = 'flex';
+                    this.updateAvatarDisplay();
+                    
+                    this.addMessage('Thank you for practicing English with me today! Keep up the great work!', 'avatar');
+                    
+                } catch (error) {
+                    console.error('Error ending conversation:', error);
+                    this.showMicrophoneMessage('Failed to properly end conversation, but session is stopped locally.', 'warning');
+                    
+                    // Force end locally even if API call failed
+                    this.isConversationActive = false;
+                    document.getElementById('startConversation').disabled = false;
+                    document.getElementById('endConversation').disabled = true;
+                }
+            }
+
+            async resetConversation() {
+                if (!confirm('Reset conversation memory? This will clear your current conversation and reload your learning history from all modules (reading vocabulary, speaking pronunciation, etc).')) {
+                    return;
+                }
+
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/conversation/reset', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        // Clear conversation log
+                        const conversationLog = document.getElementById('conversationLog');
+                        conversationLog.innerHTML = `
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle"></i> ${data.message}
+                            </div>
+                            <div class="text-center text-muted mt-3">
+                                <i class="bi bi-chat-square-dots" style="font-size: 2rem;"></i>
+                                <p class="mt-2">Start a new conversation to use updated memory!</p>
+                            </div>
+                        `;
+
+                        this.showMicrophoneMessage('Memory reset! Start a new conversation to practice your vocabulary struggles.', 'success');
+                    } else {
+                        this.showMicrophoneMessage('Failed to reset conversation: ' + data.error, 'danger');
+                    }
+                } catch (error) {
+                    console.error('Error resetting conversation:', error);
+                    this.showMicrophoneMessage('Failed to reset conversation.', 'danger');
+                }
+            }
+
+            showSessionAnalytics(analytics) {
+                // Show comprehensive session analytics
+                setTimeout(() => {
+                    this.addMessage('📊 Session Summary:', 'avatar');
+                    this.addMessage(`💬 Total turns: ${analytics.total_conversation_turns}`, 'avatar');
+                    this.addMessage(`📝 Words spoken: ${analytics.total_words_spoken}`, 'avatar');
+                    this.addMessage(`⏱️ Session duration: ${analytics.session_duration_minutes} minutes`, 'avatar');
+                    
+                    if (analytics.fluency_score) {
+                        this.addMessage(`🗣️ Fluency score: ${analytics.fluency_score}/100`, 'avatar');
+                    }
+                    
+                    if (analytics.pronunciation_score) {
+                        this.addMessage(`🎯 Pronunciation score: ${analytics.pronunciation_score}/100`, 'avatar');
+                    }
+                    
+                    // Show achievements
+                    if (analytics.achievements && analytics.achievements.length > 0) {
+                        this.addMessage('🏆 Achievements:', 'avatar');
+                        analytics.achievements.forEach(achievement => {
+                            this.addMessage(achievement, 'avatar');
+                        });
+                    }
+                    
+                    // Show recommendations
+                    if (analytics.recommendations && analytics.recommendations.length > 0) {
+                        this.addMessage('💡 Recommendations for next time:', 'avatar');
+                        analytics.recommendations.slice(0, 3).forEach(rec => {
+                            this.addMessage(`• ${rec}`, 'avatar');
+                        });
+                    }
+                }, 1000);
+            }
+            
+            async toggleRecording() {
+                if (!this.isConversationActive) {
+                    this.showMicrophoneMessage('Please start a conversation first!', 'warning');
+                    return;
+                }
+                
+                // Check microphone availability first
+                if (!this.microphoneAvailable) {
+                    this.showMicrophoneMessage('No microphone detected. Please use the text input below to communicate.', 'info');
+                    return;
+                }
+                
+                if (this.microphonePermission === 'denied') {
+                    this.showMicrophoneMessage('Microphone access was denied. Please enable microphone permissions in your browser settings or use text input.', 'warning');
+                    return;
+                }
+                
+                if (this.microphonePermission === 'not_supported') {
+                    this.showMicrophoneMessage('Your browser does not support microphone access. Please use the text input below.', 'info');
+                    return;
+                }
+                
+                if (!this.isRecording) {
+                    await this.startRecording();
+                } else {
+                    this.stopRecording();
+                }
+            }
+            
+            async startRecording() {
+                try {
+                    // Request microphone access with specific constraints
+                    const constraints = {
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        }
+                    };
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    
+                    // Check if MediaRecorder is supported
+                    if (!MediaRecorder.isTypeSupported('audio/webm')) {
+                        console.warn('WebM audio not supported, using default format');
+                    }
+                    
+                    this.mediaRecorder = new MediaRecorder(stream);
+                    this.audioChunks = [];
+                    
+                    this.mediaRecorder.ondataavailable = (event) => {
+                        this.audioChunks.push(event.data);
+                    };
+                    
+                    this.mediaRecorder.onstop = () => {
+                        // Stop all tracks to release microphone
+                        stream.getTracks().forEach(track => track.stop());
+                        this.processAudioRecording();
+                    };
+                    
+                    this.mediaRecorder.onerror = (event) => {
+                        console.error('MediaRecorder error:', event.error);
+                        this.showMicrophoneMessage('Recording error occurred. Please try again.', 'error');
+                        this.isRecording = false;
+                        this.updateVoiceButtonState();
+                    };
+                    
+                    this.mediaRecorder.start();
+                    this.isRecording = true;
+                    
+                    // Update permission status
+                    this.microphonePermission = 'granted';
+                    
+                    // Update UI
+                    const voiceBtn = document.getElementById('voiceButton');
+                    voiceBtn.classList.add('recording');
+                    voiceBtn.innerHTML = '<i class="bi bi-stop"></i>';
+                    voiceBtn.title = 'Click to stop recording';
+                    document.getElementById('avatarStatus').textContent = 'Listening...';
+                    document.getElementById('avatarStatus').className = 'status-indicator listening';
+                    
+                } catch (error) {
+                    console.error('Error accessing microphone:', error);
+                    this.handleMicrophoneError(error);
+                }
+            }
+            
+            handleMicrophoneError(error) {
+                let message = 'Could not access microphone. ';
+                let type = 'error';
+                
+                if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                    this.microphonePermission = 'denied';
+                    message += 'Please allow microphone access when prompted, or use text input instead.';
+                    type = 'warning';
+                } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+                    this.microphoneAvailable = false;
+                    message += 'No microphone was found. Please connect a microphone or use text input.';
+                    type = 'info';
+                } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+                    message += 'Microphone is busy or being used by another application. Please close other apps using the microphone or use text input.';
+                    type = 'warning';
+                } else if (error.name === 'NotSupportedError') {
+                    this.microphonePermission = 'not_supported';
+                    message += 'Your browser does not support microphone recording. Please use text input.';
+                    type = 'info';
+                } else {
+                    message += 'Please check your microphone settings or use text input instead.';
+                }
+                
+                this.showMicrophoneMessage(message, type);
+                this.updateVoiceButtonState();
+            }
+            
+            showMicrophoneMessage(message, type = 'info') {
+                // Create or update status message
+                let statusDiv = document.getElementById('microphoneStatus');
+                if (!statusDiv) {
+                    statusDiv = document.createElement('div');
+                    statusDiv.id = 'microphoneStatus';
+                    statusDiv.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        max-width: 350px;
+                        padding: 12px 16px;
+                        border-radius: 8px;
+                        color: white;
+                        font-size: 14px;
+                        z-index: 9999;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                        transition: all 0.3s ease;
+                    `;
+                    document.body.appendChild(statusDiv);
+                }
+                
+                // Set color based on type
+                const colors = {
+                    'info': '#17a2b8',
+                    'warning': '#ffc107',
+                    'error': '#dc3545',
+                    'success': '#28a745'
+                };
+                
+                statusDiv.style.backgroundColor = colors[type] || colors.info;
+                statusDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-mic${type === 'error' ? '-slash' : ''}"></i>
+                        <span>${message}</span>
+                        <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; font-size: 16px; cursor: pointer; margin-left: auto;">×</button>
+                    </div>
+                `;
+                
+                // Auto-hide after 8 seconds
+                setTimeout(() => {
+                    if (statusDiv && statusDiv.parentNode) {
+                        statusDiv.remove();
+                    }
+                }, 8000);
+            }
+            
+            stopRecording() {
+                if (this.mediaRecorder && this.isRecording) {
+                    this.mediaRecorder.stop();
+                    this.isRecording = false;
+                    
+                    // Update UI
+                    const voiceBtn = document.getElementById('voiceButton');
+                    voiceBtn.classList.remove('recording');
+                    voiceBtn.innerHTML = '<i class="bi bi-mic"></i>';
+                    document.getElementById('avatarStatus').textContent = 'Processing...';
+                    document.getElementById('avatarStatus').className = 'status-indicator';
+                }
+            }
+            
+            async processAudioRecording() {
+                // This would send audio to speech-to-text service
+                // For now, simulate with a placeholder
+                const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
+                
+                // Simulate speech recognition
+                setTimeout(() => {
+                    const simulatedText = "Hello, how are you today?"; // This would come from speech recognition
+                    this.addMessage(simulatedText, 'user');
+                    this.sendMessageToAvatar(simulatedText);
+                }, 1000);
+            }
+            
+            sendTextMessage() {
+                const input = document.getElementById('textInput');
+                const message = input.value.trim();
+                
+                if (!message || !this.isConversationActive) return;
+                
+                input.value = '';
+                this.addMessage(message, 'user');
+                this.sendMessageToAvatar(message);
+            }
+            
+            async initializeAvatarVideo(sessionData) {
+                try {
+                    // Initialize avatar video stream
+                    const videoElement = document.getElementById('avatarVideo');
+                    const placeholder = document.getElementById('avatarPlaceholder');
+                    
+                    if (sessionData.streamUrl) {
+                        // For HeyGen streaming, we would set up WebRTC connection here
+                        // This is a placeholder for the actual WebRTC implementation
+                        placeholder.style.display = 'none';
+                        videoElement.style.display = 'block';
+                        
+                        // Simulate avatar loading
+                        videoElement.poster = 'data:image/svg+xml;base64,' + btoa(`
+                            <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+                                <rect width="400" height="300" fill="#f8f9fa"/>
+                                <circle cx="200" cy="120" r="40" fill="#6f42c1"/>
+                                <text x="200" y="200" text-anchor="middle" font-family="Arial" font-size="16" fill="#6c757d">Avatar Loading...</text>
+                            </svg>
+                        `);
+                        
+                        console.log('Avatar video initialized with session:', sessionData.sessionId);
+                    }
+                } catch (error) {
+                    console.error('Error initializing avatar video:', error);
+                }
+            }
+            
+            async sendMessageToAvatar(message) {
+                document.getElementById('avatarStatus').textContent = 'Thinking...';
+                
+                try {
+                    // Use streaming conversation API
+                    const response = await fetch('/api/conversation/streaming/message', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            sessionKey: this.streamingSessionKey,
+                            message: message
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.addMessage(data.aiResponse, 'avatar');
+                        
+                        // Show analytics if available
+                        if (data.conversationAnalysis) {
+                            this.showConversationAnalytics(data.conversationAnalysis);
+                        }
+                        
+                        // Show pronunciation score if available
+                        if (data.pronunciationScore) {
+                            this.showPronunciationScore(data.pronunciationScore);
+                        }
+                    } else {
+                        this.addMessage('Sorry, I had trouble understanding. Could you try again?', 'avatar');
+                    }
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                    this.addMessage('I\'m having connection issues. Let\'s try again!', 'avatar');
+                } finally {
+                    document.getElementById('avatarStatus').textContent = 'Ready to listen';
+                    document.getElementById('avatarStatus').className = 'status-indicator speaking';
+                }
+            }
+            
+            showConversationAnalytics(analytics) {
+                // Show subtle analytics feedback
+                if (analytics.word_count >= 15) {
+                    setTimeout(() => {
+                        this.addMessage('👍 Great detail in your response!', 'avatar');
+                    }, 500);
+                }
+                
+                if (analytics.has_question) {
+                    setTimeout(() => {
+                        this.addMessage('❓ I love that you asked a question - that shows great engagement!', 'avatar');
+                    }, 700);
+                }
+            }
+            
+            showPronunciationScore(score) {
+                if (score >= 80) {
+                    setTimeout(() => {
+                        this.addMessage(`🗣️ Excellent pronunciation! Score: ${score}/100`, 'avatar');
+                    }, 300);
+                } else if (score >= 60) {
+                    setTimeout(() => {
+                        this.addMessage(`📈 Good pronunciation! Keep practicing. Score: ${score}/100`, 'avatar');
+                    }, 300);
+                }
+            }
+            
+            addMessage(text, sender) {
+                const log = document.getElementById('conversationLog');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}`;
+                messageDiv.textContent = text;
+                
+                log.appendChild(messageDiv);
+                log.scrollTop = log.scrollHeight;
+            }
+            
+            initializeHeyGenStreaming() {
+                // Placeholder for HeyGen streaming API integration
+                console.log('Initializing HeyGen streaming...');
+                // This would integrate with HeyGen's streaming API
+            }
+            
+            playAvatarAudio(audioUrl) {
+                // Play avatar speech audio
+                const audio = new Audio(audioUrl);
+                audio.play().catch(console.error);
+            }
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new AvatarConversation();
+        });
+    </script>
+</body>
+</html>

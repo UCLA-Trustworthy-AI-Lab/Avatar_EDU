@@ -1,0 +1,2145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speaking Practice - Language Arts Agent</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --accent-color: #FF9800;
+            --danger-color: #f44336;
+            --success-color: #8BC34A;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .practice-type-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            max-width: 1200px;
+            margin: 0 auto 30px auto;
+        }
+
+        .practice-type-card {
+            max-width: 280px;
+            justify-self: center;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .practice-type-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .practice-type-card.active {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .practice-type-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .word-practice { color: var(--primary-color); }
+        .sentence-practice { color: var(--secondary-color); }
+        .paragraph-practice { color: var(--accent-color); }
+        .topic-practice { color: #e74c3c; }
+
+        .practice-content-area {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            min-height: 400px;
+        }
+
+        .target-text {
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .phonetic-text {
+            font-size: 24px;
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-family: 'Lucida Sans Unicode', 'Arial Unicode MS', serif;
+        }
+
+        .context-hint {
+            font-size: 16px;
+            color: #888;
+            text-align: center;
+            font-style: italic;
+            margin-bottom: 30px;
+        }
+
+        .recording-controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .record-btn {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: none;
+            font-size: 48px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .record-btn.start {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .record-btn.stop {
+            background: linear-gradient(135deg, #f44336 0%, #e91e63 100%);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .playback-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .audio-visualizer {
+            height: 100px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .audio-bar {
+            width: 4px;
+            background: var(--primary-color);
+            margin: 0 2px;
+            animation: wave 1s ease-in-out infinite;
+            height: 20px;
+        }
+
+        .audio-bar:nth-child(2) { animation-delay: 0.1s; height: 40px; }
+        .audio-bar:nth-child(3) { animation-delay: 0.2s; height: 60px; }
+        .audio-bar:nth-child(4) { animation-delay: 0.3s; height: 40px; }
+        .audio-bar:nth-child(5) { animation-delay: 0.4s; height: 20px; }
+
+        @keyframes wave {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(1.5); }
+        }
+
+        .score-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .score-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .score-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .score-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .progress-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        .progress-chart {
+            height: 300px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .feedback-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .feedback-text {
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        .tips-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .tip-card {
+            background: white;
+            border-left: 4px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .phoneme-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        .difficulty-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .difficulty-btn {
+            padding: 8px 20px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .difficulty-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .category-selector {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .category-chip {
+            padding: 8px 16px;
+            background: #e0e0e0;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .category-chip.active {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+        }
+
+        .content-source-selector {
+            margin: 20px 0;
+        }
+
+        .source-btn {
+            height: 100px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .source-btn:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .source-btn i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .source-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .word-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .word-item:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .word-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .word-phonetic {
+            font-style: italic;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .word-translation {
+            font-size: 14px;
+            color: #888;
+        }
+
+
+        #topicAnswerView .alert {
+            border-radius: 10px;
+        }
+
+        #topicText {
+            font-size: 1.1rem;
+            font-weight: 500;
+            line-height: 1.6;
+        }
+
+        .nav-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn.prev {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .nav-btn.next {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .practice-counter {
+            text-align: center;
+            font-size: 18px;
+            color: #666;
+            margin: 20px 0;
+        }
+
+        .mastery-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+        }
+
+        .mastery-indicator.mastered {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .mastery-indicator.learning {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .mastery-indicator.new {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .practice-type-selector {
+                flex-direction: column;
+            }
+
+            .practice-type-card {
+                max-width: 100%;
+            }
+
+            .target-text {
+                font-size: 24px;
+            }
+
+            .record-btn {
+                width: 80px;
+                height: 80px;
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-mic-fill"></i> Speaking Practice
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/dashboard">
+                    <i class="bi bi-house"></i> Dashboard
+                </a>
+                <a class="nav-link" href="/logout">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <!-- Practice Type Selection -->
+        <div class="practice-type-selector">
+            <div class="practice-type-card active" data-type="word">
+                <i class="bi bi-alphabet practice-type-icon word-practice"></i>
+                <h3>Words</h3>
+                <p>Practice individual word pronunciation</p>
+                <small>Focus on phonemes and sounds</small>
+            </div>
+            <div class="practice-type-card" data-type="sentence">
+                <i class="bi bi-chat-quote practice-type-icon sentence-practice"></i>
+                <h3>Sentences</h3>
+                <p>Practice sentence intonation</p>
+                <small>Work on rhythm and stress</small>
+            </div>
+            <div class="practice-type-card" data-type="paragraph">
+                <i class="bi bi-text-paragraph practice-type-icon paragraph-practice"></i>
+                <h3>Paragraphs</h3>
+                <p>Extended speaking practice</p>
+                <small>Build fluency and coherence</small>
+            </div>
+            <div class="practice-type-card" data-type="topic">
+                <i class="bi bi-chat-text practice-type-icon topic-practice"></i>
+                <h3>Topic Answer</h3>
+                <p>IELTS-style topic speaking</p>
+                <small>90s prep + 1min speaking</small>
+            </div>
+        </div>
+
+        <!-- Difficulty and Category Selection -->
+        <div class="practice-content-area">
+            <div class="difficulty-selector">
+                <button class="difficulty-btn" data-level="beginner">Beginner</button>
+                <button class="difficulty-btn active" data-level="intermediate">Intermediate</button>
+                <button class="difficulty-btn" data-level="advanced">Advanced</button>
+                <button class="difficulty-btn" data-level="expert">Expert</button>
+            </div>
+
+            <div class="category-selector" id="categorySelector">
+                <!-- Categories will be loaded dynamically based on practice type -->
+            </div>
+
+            <!-- Content Source Selection -->
+            <div class="content-source-selector" id="contentSourceSelector" style="display: none;">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5>Choose Content Source</h5>
+                                <div class="row mt-3">
+                                    <div class="col-md-4">
+                                        <button class="btn btn-outline-primary w-100 source-btn" data-source="database">
+                                            <i class="bi bi-database"></i><br>
+                                            <strong>Database</strong><br>
+                                            <small>Educational materials</small>
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button class="btn btn-outline-success w-100 source-btn" data-source="samples">
+                                            <i class="bi bi-file-text"></i><br>
+                                            <strong>Sample Files</strong><br>
+                                            <small>Pre-made examples</small>
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button class="btn btn-outline-secondary w-100 source-btn" data-source="ai">
+                                            <i class="bi bi-cpu"></i><br>
+                                            <strong>AI Generated</strong><br>
+                                            <small>Custom content</small>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Word List View -->
+            <div id="wordListView" style="display: none;">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <span id="listTitle">Word List</span>
+                            <span class="badge bg-primary" id="listCount">0</span>
+                        </h5>
+                        <button class="btn btn-success" id="startPracticeBtn">
+                            <i class="bi bi-play-circle"></i> Start Practice
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="wordListContainer">
+                            <!-- Word list will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Topic Answer View -->
+            <div id="topicAnswerView" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-chat-text"></i> Topic Answer Practice
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Topic Display -->
+                        <div id="topicDisplay" class="mb-4">
+                            <div class="alert alert-info">
+                                <h6><i class="bi bi-lightbulb"></i> Speaking Topic:</h6>
+                                <p class="mb-0" id="topicText">Loading topic...</p>
+                            </div>
+                        </div>
+
+                        <!-- Recording Interface -->
+                        <div class="speaking-interface">
+                            <!-- Audio Visualizer (placeholder) -->
+                            <div class="audio-visualizer" id="audioVisualizer" style="display: none;">
+                                <div class="visual-bar"></div>
+                                <div class="visual-bar"></div>
+                                <div class="visual-bar"></div>
+                                <div class="visual-bar"></div>
+                                <div class="visual-bar"></div>
+                            </div>
+
+                            <!-- Recording Controls -->
+                            <div class="text-center mb-4">
+                                <button class="record-btn start" id="topicRecordBtn">
+                                    <i class="bi bi-mic-fill"></i>
+                                </button>
+                            </div>
+
+                            <!-- Playback Controls -->
+                            <div class="playback-controls" id="topicPlaybackControls" style="display: none;">
+                                <button class="btn btn-secondary" id="topicPlayBtn">
+                                    <i class="bi bi-play-fill"></i> Play Recording
+                                </button>
+                                <button class="btn btn-primary" id="topicSubmitBtn">
+                                    <i class="bi bi-check-circle"></i> Submit for Assessment
+                                </button>
+                                <button class="btn btn-warning" id="topicRetryBtn">
+                                    <i class="bi bi-arrow-clockwise"></i> Try Again
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Practice Content -->
+            <div id="practiceContent">
+                <div class="practice-counter">
+                    <span id="currentIndex">1</span> / <span id="totalItems">10</span>
+                    <span class="mastery-indicator new">
+                        <i class="bi bi-star"></i> New Word
+                    </span>
+                </div>
+
+                <div class="progress-indicator" style="margin: 10px 0; font-size: 0.9rem; color: #666;">
+                    <span id="progressText">Progress: 0/0 completed</span>
+                </div>
+
+                <div class="target-text" id="targetText">
+                    Select a category to start practicing
+                </div>
+
+                <div class="phonetic-text" id="phoneticText">
+                    <!-- Phonetic transcription will appear here -->
+                </div>
+
+                <div class="context-hint" id="contextHint">
+                    <!-- Context or usage hint will appear here -->
+                </div>
+
+                <!-- Audio Visualizer -->
+                <div class="audio-visualizer" id="audioVisualizer" style="display: none;">
+                    <div class="audio-bar"></div>
+                    <div class="audio-bar"></div>
+                    <div class="audio-bar"></div>
+                    <div class="audio-bar"></div>
+                    <div class="audio-bar"></div>
+                </div>
+
+                <!-- Recording Controls -->
+                <div class="recording-controls">
+                    <button class="record-btn start" id="recordBtn">
+                        <i class="bi bi-mic-fill"></i>
+                    </button>
+                </div>
+
+                <!-- Playback Controls -->
+                <div class="playback-controls" id="playbackControls" style="display: none;">
+                    <button class="btn btn-secondary" id="playBtn">
+                        <i class="bi bi-play-fill"></i> Play Recording
+                    </button>
+                    <button class="btn btn-primary" id="submitBtn">
+                        <i class="bi bi-check-circle"></i> Submit for Assessment
+                    </button>
+                    <button class="btn btn-warning" id="retryBtn">
+                        <i class="bi bi-arrow-clockwise"></i> Try Again
+                    </button>
+                </div>
+
+                <!-- Navigation -->
+                <div class="navigation-buttons">
+                    <button class="nav-btn prev" id="prevBtn" disabled>
+                        <i class="bi bi-arrow-left"></i> Previous
+                    </button>
+                    <button class="nav-btn next" id="nextBtn" disabled>
+                        Next <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Score Display -->
+        <div class="score-display" id="scoreDisplay" style="display: none;">
+            <div class="score-card">
+                <div class="score-value" id="pronunciationScore">--</div>
+                <div class="score-label">Pronunciation</div>
+            </div>
+            <div class="score-card">
+                <div class="score-value" id="accuracyScore">--</div>
+                <div class="score-label">Accuracy</div>
+            </div>
+            <div class="score-card">
+                <div class="score-value" id="fluencyScore">--</div>
+                <div class="score-label">Fluency</div>
+            </div>
+            <div class="score-card" id="prosodyCard" style="display: none;">
+                <div class="score-value" id="prosodyScore">--</div>
+                <div class="score-label">Prosody</div>
+            </div>
+        </div>
+
+        <!-- Feedback Section -->
+        <div class="feedback-section" id="feedbackSection" style="display: none;">
+            <h4><i class="bi bi-lightbulb"></i> Feedback</h4>
+            <div class="feedback-text" id="feedbackText">
+                <!-- AI feedback will appear here -->
+            </div>
+        </div>
+
+        <!-- Pronunciation Tips -->
+        <div class="tips-section" id="tipsSection" style="display: none;">
+            <!-- Tips will be loaded dynamically -->
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section">
+            <h4><i class="bi bi-graph-up"></i> Your Progress</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="progress-chart" id="progressChart">
+                        <!-- Progress visualization will be added here -->
+                        <canvas id="scoreChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5>Recent Sessions</h5>
+                    <div id="recentSessions">
+                        <!-- Recent session data will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Speaking Practice Application
+        class SpeakingPractice {
+            constructor() {
+                this.currentType = 'word';
+                this.currentDifficulty = 'intermediate';
+                this.currentCategory = null;
+                this.practiceContent = [];
+                this.currentIndex = 0;
+                this.sessionId = null;
+                this.mediaRecorder = null;
+                this.audioChunks = [];
+                this.recordedBlob = null;
+                this.isRecording = false;
+                this.currentTopic = null;
+                this.preparationTime = 90;
+                this.speakingTime = 60;
+                this.currentPhase = null; // 'prep', 'speak', 'finished'
+                this.completedItems = [];
+                this.currentStream = null; // Store audio stream reference
+
+                this.initializeEventListeners();
+                this.checkMicrophoneSupport();
+
+                // Check for saved session state first
+                if (this.loadSessionState()) {
+                    // Restore the UI to match loaded state
+                    this.restoreUIFromState();
+                } else {
+                    // No saved state, start fresh
+                    this.loadCategories();
+                    this.startSession();
+                }
+            }
+
+            initializeEventListeners() {
+                // Practice type selection
+                document.querySelectorAll('.practice-type-card').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        this.selectPracticeType(card.dataset.type);
+                    });
+                });
+
+                // Difficulty selection
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.selectDifficulty(btn.dataset.level);
+                    });
+                });
+
+                // Recording controls
+                document.getElementById('recordBtn').addEventListener('click', () => {
+                    this.toggleRecording();
+                });
+
+                document.getElementById('playBtn').addEventListener('click', () => {
+                    this.playRecording();
+                });
+
+                document.getElementById('submitBtn').addEventListener('click', () => {
+                    this.submitForAssessment();
+                });
+
+                document.getElementById('retryBtn').addEventListener('click', () => {
+                    this.retryRecording();
+                });
+
+                // Navigation
+                document.getElementById('prevBtn').addEventListener('click', () => {
+                    this.navigatePrevious();
+                });
+
+                document.getElementById('nextBtn').addEventListener('click', () => {
+                    this.navigateNext();
+                });
+            }
+
+            selectPracticeType(type) {
+                this.currentType = type;
+
+                // Clear any existing session state when switching types
+                this.clearSessionState();
+
+                // Reset all content and state
+                this.practiceContent = [];
+                this.currentIndex = 0;
+                this.currentCategory = null;
+                this.completedItems = [];
+
+                // Update UI
+                document.querySelectorAll('.practice-type-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+                document.querySelector(`[data-type="${type}"]`).classList.add('active');
+
+                // Show/hide prosody score for sentences and paragraphs
+                const prosodyCard = document.getElementById('prosodyCard');
+                if (type === 'sentence' || type === 'paragraph') {
+                    prosodyCard.style.display = 'block';
+                } else {
+                    prosodyCard.style.display = 'none';
+                }
+
+                // Reset UI views
+                document.querySelector('.practice-content').style.display = 'none';
+                document.querySelector('.content-selection').style.display = 'block';
+                document.querySelector('.content-source-selection').style.display = 'none';
+
+                // Handle topic answer type differently
+                if (type === 'topic') {
+                    this.showTopicAnswerView();
+                } else {
+                    // Load categories for other types
+                    this.loadCategories();
+                }
+            }
+
+            selectDifficulty(level) {
+                this.currentDifficulty = level;
+
+                // Update UI
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-level="${level}"]`).classList.add('active');
+
+                // Reload content if category is selected
+                if (this.currentCategory) {
+                    this.loadPracticeContent();
+                }
+            }
+
+            async loadCategories() {
+                try {
+                    const response = await fetch('/api/speaking/categories', {
+                        headers: {
+                            'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
+                        }
+                    });
+                    const categories = await response.json();
+
+                    const categorySelector = document.getElementById('categorySelector');
+                    categorySelector.innerHTML = '';
+
+                    const typeCategories = categories[this.currentType] || [];
+                    typeCategories.forEach(cat => {
+                        const chip = document.createElement('div');
+                        chip.className = 'category-chip';
+                        chip.textContent = cat.name;
+                        chip.dataset.category = cat.id;
+                        chip.title = cat.description;
+
+                        chip.addEventListener('click', () => {
+                            this.selectCategory(cat.id);
+                        });
+
+                        categorySelector.appendChild(chip);
+                    });
+
+                    return categories; // Return the categories for use in restoreUIFromState
+                } catch (error) {
+                    console.error('Error loading categories:', error);
+                    return {};
+                }
+            }
+
+            selectCategory(category) {
+                this.currentCategory = category;
+
+                // Update UI
+                document.querySelectorAll('.category-chip').forEach(chip => {
+                    chip.classList.remove('active');
+                });
+                document.querySelector(`[data-category="${category}"]`).classList.add('active');
+
+                // Show content source selection
+                this.showContentSourceSelection();
+            }
+
+            saveSessionState() {
+                // Save current session state to localStorage for persistence
+                const sessionState = {
+                    type: this.currentType,
+                    difficulty: this.currentDifficulty,
+                    category: this.currentCategory,
+                    content: this.practiceContent,
+                    currentIndex: this.currentIndex,
+                    sessionId: this.sessionId,
+                    completedItems: this.completedItems || [],
+                    totalItems: this.practiceContent ? this.practiceContent.length : 0
+                };
+                localStorage.setItem('speakingSessionState', JSON.stringify(sessionState));
+            }
+
+            loadSessionState() {
+                // Load session state from localStorage
+                const savedState = localStorage.getItem('speakingSessionState');
+                if (savedState) {
+                    const state = JSON.parse(savedState);
+                    this.currentType = state.type;
+                    this.currentDifficulty = state.difficulty;
+                    this.currentCategory = state.category;
+                    this.practiceContent = state.content;
+                    this.currentIndex = state.currentIndex;
+                    this.sessionId = state.sessionId;
+                    this.completedItems = state.completedItems || [];
+                    return true;
+                }
+                return false;
+            }
+
+            clearSessionState() {
+                localStorage.removeItem('speakingSessionState');
+                this.completedItems = [];
+            }
+
+            markItemCompleted(index) {
+                if (!this.completedItems) {
+                    this.completedItems = [];
+                }
+                if (!this.completedItems.includes(index)) {
+                    this.completedItems.push(index);
+                    this.saveSessionState();
+                    this.updateProgress();
+                }
+            }
+
+            updateProgress() {
+                if (this.practiceContent && this.completedItems) {
+                    const progress = this.completedItems.length;
+                    const total = this.practiceContent.length;
+
+                    // Update progress display
+                    const progressText = document.getElementById('progressText');
+                    if (progressText) {
+                        progressText.textContent = `Progress: ${progress}/${total} completed`;
+                    }
+
+                    // Show completion message if all items done
+                    if (progress >= total) {
+                        this.showSessionCompletion();
+                    }
+                }
+            }
+
+            showSessionCompletion() {
+                // Unlock navigation when session is complete
+                this.unlockNavigation();
+
+                const completionAlert = document.createElement('div');
+                completionAlert.className = 'alert alert-success alert-dismissible fade show';
+                const itemType = this.currentType === 'word' ? 'words' :
+                               this.currentType === 'sentence' ? 'sentences' :
+                               this.currentType === 'paragraph' ? 'paragraphs' : 'items';
+                completionAlert.innerHTML = `
+                    <strong>🎉 Session Complete!</strong> You've finished all ${this.practiceContent.length} ${itemType}.
+                    <button type="button" class="btn btn-sm btn-outline-success ms-2" onclick="speakingPractice.startNewSession()">
+                        Start New Session
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+
+                const container = document.querySelector('.practice-content');
+                container.insertBefore(completionAlert, container.firstChild);
+            }
+
+            startNewSession() {
+                this.clearSessionState();
+                this.unlockNavigation(); // Unlock navigation when starting fresh
+                location.reload(); // Refresh to start fresh
+            }
+
+            lockNavigation() {
+                // Lock navigation during practice sessions
+                const navLinks = document.querySelectorAll('a[href="/"], a[href="/reading"], a[href="/conversation"]');
+                navLinks.forEach(link => {
+                    link.style.pointerEvents = 'none';
+                    link.style.opacity = '0.5';
+                    link.title = 'Complete your speaking session before switching modules';
+                });
+
+                // Add confirmation dialog for page unload
+                window.addEventListener('beforeunload', this.beforeUnloadHandler);
+
+                // Show lock indicator
+                this.showLockIndicator();
+            }
+
+            unlockNavigation() {
+                // Unlock navigation
+                const navLinks = document.querySelectorAll('a[href="/"], a[href="/reading"], a[href="/conversation"]');
+                navLinks.forEach(link => {
+                    link.style.pointerEvents = 'auto';
+                    link.style.opacity = '1';
+                    link.title = '';
+                });
+
+                // Remove beforeunload handler
+                window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+
+                // Hide lock indicator
+                this.hideLockIndicator();
+            }
+
+            beforeUnloadHandler(event) {
+                event.preventDefault();
+                event.returnValue = 'You have an active speaking session. Are you sure you want to leave?';
+                return 'You have an active speaking session. Are you sure you want to leave?';
+            }
+
+            showLockIndicator() {
+                let indicator = document.getElementById('sessionLockIndicator');
+                if (!indicator) {
+                    indicator = document.createElement('div');
+                    indicator.id = 'sessionLockIndicator';
+                    indicator.className = 'alert alert-warning';
+                    indicator.innerHTML = `
+                        <i class="bi bi-lock"></i> Session Active - Complete your practice to unlock navigation
+                        <button type="button" class="btn btn-sm btn-outline-warning ms-2" onclick="speakingPractice.forceUnlock()">
+                            Force Exit
+                        </button>
+                    `;
+                    indicator.style.position = 'fixed';
+                    indicator.style.top = '10px';
+                    indicator.style.right = '10px';
+                    indicator.style.zIndex = '9999';
+                    indicator.style.maxWidth = '300px';
+                    document.body.appendChild(indicator);
+                }
+            }
+
+            hideLockIndicator() {
+                const indicator = document.getElementById('sessionLockIndicator');
+                if (indicator) {
+                    indicator.remove();
+                }
+            }
+
+            forceUnlock() {
+                if (confirm('This will end your current session and lose progress. Continue?')) {
+                    this.clearSessionState();
+                    this.unlockNavigation();
+                    location.reload();
+                }
+            }
+
+            async checkMicrophoneSupport() {
+                try {
+                    // Basic browser support check
+                    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                        this.showMicrophoneError('Your browser does not support microphone access. Please use Chrome, Firefox, or Safari.');
+                        return false;
+                    }
+
+                    // Check if we're on HTTPS (required for microphone in most browsers)
+                    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                        this.showMicrophoneWarning('Microphone access requires HTTPS. Some features may not work properly.');
+                    }
+
+                    // Check MediaRecorder support
+                    if (typeof MediaRecorder === 'undefined') {
+                        this.showMicrophoneError('Your browser does not support audio recording.');
+                        return false;
+                    }
+
+                    // Try to get available audio input devices
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    const audioInputs = devices.filter(device => device.kind === 'audioinput');
+
+                    if (audioInputs.length === 0) {
+                        this.showMicrophoneWarning('No microphone devices found. Please connect a microphone.');
+                        return false;
+                    }
+
+                    console.log(`Found ${audioInputs.length} microphone device(s)`);
+                    return true;
+
+                } catch (error) {
+                    console.error('Error checking microphone support:', error);
+                    this.showMicrophoneWarning('Unable to detect microphone devices.');
+                    return false;
+                }
+            }
+
+            showMicrophoneError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'alert alert-danger';
+                errorDiv.innerHTML = `<i class="bi bi-exclamation-triangle"></i> ${message}`;
+
+                const container = document.querySelector('.speaking-interface') || document.body;
+                container.insertBefore(errorDiv, container.firstChild);
+
+                // Disable record button
+                const recordBtn = document.getElementById('recordBtn');
+                if (recordBtn) {
+                    recordBtn.disabled = true;
+                    recordBtn.title = message;
+                }
+            }
+
+            showMicrophoneWarning(message) {
+                const warningDiv = document.createElement('div');
+                warningDiv.className = 'alert alert-warning alert-dismissible fade show';
+                warningDiv.innerHTML = `
+                    <i class="bi bi-exclamation-triangle"></i> ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+
+                const container = document.querySelector('.speaking-interface') || document.body;
+                container.insertBefore(warningDiv, container.firstChild);
+            }
+
+            async testMicrophone() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                    // Show success message
+                    const successDiv = document.createElement('div');
+                    successDiv.className = 'alert alert-success alert-dismissible fade show';
+                    successDiv.innerHTML = `
+                        <i class="bi bi-check-circle"></i> Microphone test successful! You can now record audio.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+
+                    const container = document.querySelector('.speaking-interface') || document.body;
+                    container.insertBefore(successDiv, container.firstChild);
+
+                    // Clean up test stream
+                    stream.getTracks().forEach(track => track.stop());
+
+                    return true;
+                } catch (error) {
+                    console.error('Microphone test failed:', error);
+                    this.showMicrophoneError(`Microphone test failed: ${error.message}`);
+                    return false;
+                }
+            }
+
+            restoreUIFromState() {
+                // Restore practice type selection
+                document.querySelectorAll('.practice-type-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+                document.querySelector(`[data-type="${this.currentType}"]`)?.classList.add('active');
+
+                // Restore difficulty selection
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-level="${this.currentDifficulty}"]`)?.classList.add('active');
+
+                // Load categories and then restore category selection
+                this.loadCategories().then(() => {
+                    // Restore category selection after categories are loaded
+                    setTimeout(() => {
+                        document.querySelectorAll('.category-chip').forEach(chip => {
+                            chip.classList.remove('active');
+                        });
+                        document.querySelector(`[data-category="${this.currentCategory}"]`)?.classList.add('active');
+                    }, 100);
+                });
+
+                // Display current content and update UI
+                if (this.practiceContent && this.practiceContent.length > 0) {
+                    this.displayCurrentContent();
+                    document.getElementById('totalItems').textContent = this.practiceContent.length;
+                    this.updateProgress();
+
+                    // Show the practice content area
+                    document.querySelector('.practice-content').style.display = 'block';
+                    document.querySelector('.content-selection').style.display = 'none';
+
+                    // Lock navigation if we have an active word session
+                    if (this.currentType === 'word' && this.completedItems.length < this.practiceContent.length) {
+                        this.lockNavigation();
+                    }
+                }
+            }
+
+            async loadPracticeContent(source = 'database') {
+                try {
+                    if (source === 'samples') {
+                        // Load from sample files
+                        await this.loadSampleContent();
+                    } else {
+                        // Load from API (database or AI)
+                        const endpoint = `/api/speaking/${this.currentType}s/practice-content`;
+                        const params = new URLSearchParams({
+                            difficulty: this.currentDifficulty,
+                            category: this.currentCategory,
+                            count: this.currentType === 'paragraph' ? 3 : (this.currentType === 'sentence' ? 10 : 10),
+                            source: source
+                        });
+
+                        const response = await fetch(`${endpoint}?${params}`, {
+                            headers: {
+                                'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
+                            }
+                        });
+                        const data = await response.json();
+
+                        this.practiceContent = Array.isArray(data.content) ? data.content : [data.content];
+                    }
+
+                    this.currentIndex = 0;
+                    this.completedItems = []; // Reset completed items for new session
+
+                    // Start a new session for persistence (especially important for words)
+                    if (this.currentType === 'word') {
+                        await this.startSession();
+                        this.saveSessionState(); // Save state after loading content
+                        this.lockNavigation(); // Lock navigation during word practice
+                    }
+
+                    this.displayCurrentContent();
+
+                    // Update total items and progress
+                    document.getElementById('totalItems').textContent = this.practiceContent.length;
+                    this.updateProgress();
+                } catch (error) {
+                    console.error('Error loading practice content:', error);
+                    alert('Error loading content. Please try again.');
+                }
+            }
+
+            async loadSampleContent() {
+                try {
+                    const response = await fetch(`/samples/${this.currentType}_samples.json`);
+                    const samples = await response.json();
+
+                    // Get samples for current difficulty level
+                    const difficultyContent = samples[this.currentDifficulty] || samples['beginner'];
+
+                    // Convert to the expected format
+                    this.practiceContent = difficultyContent.map(item => ({
+                        content_text: item.content_text,
+                        phonetic_transcription: item.phonetic_transcription || '',
+                        context_hint: item.context_hint || ''
+                    }));
+                } catch (error) {
+                    console.error('Error loading sample content:', error);
+                    // Fallback to database content
+                    const endpoint = `/api/speaking/${this.currentType}s/practice-content`;
+                    const params = new URLSearchParams({
+                        difficulty: this.currentDifficulty,
+                        category: this.currentCategory || 'academic_vocabulary',
+                        count: 10,
+                        source: 'database'
+                    });
+
+                    const response = await fetch(`${endpoint}?${params}`, {
+                        headers: {
+                            'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
+                        }
+                    });
+                    const data = await response.json();
+                    this.practiceContent = Array.isArray(data.content) ? data.content : [data.content];
+                }
+            }
+
+            displayCurrentContent() {
+                if (this.practiceContent.length === 0) return;
+
+                const content = this.practiceContent[this.currentIndex];
+
+                // Update content display
+                document.getElementById('targetText').textContent = content.content_text;
+                document.getElementById('phoneticText').textContent = content.phonetic_transcription || '';
+                document.getElementById('contextHint').textContent = content.context_hint || '';
+
+                // Update counter
+                document.getElementById('currentIndex').textContent = this.currentIndex + 1;
+
+                // Update navigation buttons
+                document.getElementById('prevBtn').disabled = this.currentIndex === 0;
+                document.getElementById('nextBtn').disabled = this.currentIndex >= this.practiceContent.length - 1;
+
+                // Reset recording state
+                this.resetRecording();
+
+                // Hide previous results
+                document.getElementById('scoreDisplay').style.display = 'none';
+                document.getElementById('feedbackSection').style.display = 'none';
+                document.getElementById('tipsSection').style.display = 'none';
+            }
+
+            async startSession() {
+                try {
+                    const response = await fetch('/api/speaking/start-session', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            practice_type: this.currentType
+                        })
+                    });
+                    const data = await response.json();
+                    this.sessionId = data.session_id;
+                } catch (error) {
+                    console.error('Error starting session:', error);
+                }
+            }
+
+            async toggleRecording() {
+                if (this.isRecording) {
+                    this.stopRecording();
+                } else {
+                    await this.startRecording();
+                }
+            }
+
+            async startRecording() {
+                try {
+                    // Check if browser supports necessary APIs
+                    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                        throw new Error('Your browser does not support microphone access. Please use a modern browser like Chrome, Firefox, or Safari.');
+                    }
+
+                    // Stop any existing recording first
+                    if (this.mediaRecorder && this.isRecording) {
+                        this.stopRecording();
+                    }
+
+                    // Request microphone access with better constraints
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        }
+                    });
+
+                    // Check if MediaRecorder is supported
+                    if (!MediaRecorder.isTypeSupported('audio/webm')) {
+                        console.warn('WebM audio not supported, trying mp4...');
+                        if (!MediaRecorder.isTypeSupported('audio/mp4')) {
+                            console.warn('MP4 audio not supported, using default...');
+                        }
+                    }
+
+                    // Create MediaRecorder with fallback audio types
+                    let options = {};
+                    if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                        options.mimeType = 'audio/webm;codecs=opus';
+                    } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+                        options.mimeType = 'audio/webm';
+                    } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                        options.mimeType = 'audio/mp4';
+                    }
+
+                    this.mediaRecorder = new MediaRecorder(stream, options);
+                    this.audioChunks = [];
+                    this.currentStream = stream; // Store stream reference
+
+                    this.mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            this.audioChunks.push(event.data);
+                        }
+                    };
+
+                    this.mediaRecorder.onstop = () => {
+                        const mimeType = this.mediaRecorder.mimeType || 'audio/webm';
+                        this.recordedBlob = new Blob(this.audioChunks, { type: mimeType });
+                        this.showPlaybackControls();
+
+                        // Stop all tracks to free up the microphone
+                        if (this.currentStream) {
+                            this.currentStream.getTracks().forEach(track => track.stop());
+                        }
+                    };
+
+                    this.mediaRecorder.onerror = (event) => {
+                        console.error('MediaRecorder error:', event.error);
+                        this.stopRecording();
+                        alert('Recording error occurred. Please try again.');
+                    };
+
+                    // Start recording
+                    this.mediaRecorder.start(100); // Collect data every 100ms
+                    this.isRecording = true;
+
+                    // Update UI - handle both regular and topic interfaces
+                    const recordBtn = document.getElementById('recordBtn') || document.getElementById('topicRecordBtn');
+                    if (recordBtn) {
+                        recordBtn.classList.remove('start');
+                        recordBtn.classList.add('stop');
+                        recordBtn.innerHTML = '<i class="bi bi-stop-fill"></i>';
+                        recordBtn.disabled = false;
+                    }
+
+                    // Show visualizer
+                    const visualizer = document.getElementById('audioVisualizer');
+                    if (visualizer) {
+                        visualizer.style.display = 'flex';
+                    }
+
+                    // Update recording status
+                    console.log('Recording started successfully');
+
+                } catch (error) {
+                    console.error('Error accessing microphone:', error);
+                    this.isRecording = false;
+
+                    // Reset button state
+                    const recordBtn = document.getElementById('recordBtn');
+                    recordBtn.classList.remove('stop');
+                    recordBtn.classList.add('start');
+                    recordBtn.innerHTML = '<i class="bi bi-mic-fill"></i>';
+                    recordBtn.disabled = false;
+
+                    // Show detailed error message
+                    let errorMessage = 'Microphone access failed. ';
+
+                    if (error.name === 'NotAllowedError') {
+                        errorMessage += 'Please allow microphone access in your browser settings and refresh the page.';
+                    } else if (error.name === 'NotFoundError') {
+                        errorMessage += 'No microphone found. Please connect a microphone and try again.';
+                    } else if (error.name === 'NotSupportedError') {
+                        errorMessage += 'Your browser does not support audio recording. Please try Chrome, Firefox, or Safari.';
+                    } else if (error.name === 'SecurityError') {
+                        errorMessage += 'Microphone access is blocked. Please use HTTPS or allow permissions.';
+                    } else {
+                        errorMessage += error.message || 'Unknown error occurred.';
+                    }
+
+                    alert(errorMessage);
+                }
+            }
+
+            stopRecording() {
+                if (this.mediaRecorder && this.isRecording) {
+                    try {
+                        this.mediaRecorder.stop();
+                        this.isRecording = false;
+
+                        // Stop all tracks to free up the microphone
+                        if (this.currentStream) {
+                            this.currentStream.getTracks().forEach(track => track.stop());
+                        }
+
+                        // Update UI
+                        const recordBtn = document.getElementById('recordBtn');
+                        recordBtn.classList.remove('stop');
+                        recordBtn.classList.add('start');
+                        recordBtn.innerHTML = '<i class="bi bi-mic-fill"></i>';
+                        recordBtn.disabled = false;
+
+                        // Hide visualizer
+                        const visualizer = document.getElementById('audioVisualizer');
+                        if (visualizer) {
+                            visualizer.style.display = 'none';
+                        }
+
+                        console.log('Recording stopped successfully');
+                    } catch (error) {
+                        console.error('Error stopping recording:', error);
+                        this.isRecording = false;
+
+                        // Reset UI anyway
+                        const recordBtn = document.getElementById('recordBtn');
+                        recordBtn.classList.remove('stop');
+                        recordBtn.classList.add('start');
+                        recordBtn.innerHTML = '<i class="bi bi-mic-fill"></i>';
+                        recordBtn.disabled = false;
+                    }
+                }
+            }
+
+            showPlaybackControls() {
+                // Show playback controls for either regular or topic interface
+                const playbackControls = document.getElementById('playbackControls');
+                const topicPlaybackControls = document.getElementById('topicPlaybackControls');
+
+                if (playbackControls) {
+                    playbackControls.style.display = 'flex';
+                }
+                if (topicPlaybackControls) {
+                    topicPlaybackControls.style.display = 'flex';
+                }
+            }
+
+            playRecording() {
+                if (this.recordedBlob) {
+                    const audioUrl = URL.createObjectURL(this.recordedBlob);
+                    const audio = new Audio(audioUrl);
+                    audio.play();
+                }
+            }
+
+            retryRecording() {
+                this.resetRecording();
+            }
+
+            resetRecording() {
+                this.recordedBlob = null;
+                this.audioChunks = [];
+                document.getElementById('playbackControls').style.display = 'none';
+            }
+
+            async submitForAssessment() {
+                if (!this.recordedBlob || !this.sessionId) return;
+
+                const content = this.practiceContent[this.currentIndex];
+                const formData = new FormData();
+                formData.append('audio', this.recordedBlob, 'recording.webm');
+                formData.append(`target_${this.currentType}`, content.content_text);
+                formData.append('session_id', this.sessionId);
+
+                try {
+                    // Show loading state
+                    document.getElementById('submitBtn').disabled = true;
+                    document.getElementById('submitBtn').innerHTML = '<i class="bi bi-hourglass-split"></i> Analyzing...';
+
+                    const response = await fetch(`/api/speaking/${this.currentType}s/assess`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
+                        },
+                        body: formData
+                    });
+
+                    const result = await response.json();
+                    this.displayAssessmentResults(result);
+
+                    // Enable next button after assessment
+                    if (this.currentIndex < this.practiceContent.length - 1) {
+                        document.getElementById('nextBtn').disabled = false;
+                    }
+                } catch (error) {
+                    console.error('Error submitting for assessment:', error);
+                    alert('Error analyzing your pronunciation. Please try again.');
+                } finally {
+                    // Reset submit button
+                    document.getElementById('submitBtn').disabled = false;
+                    document.getElementById('submitBtn').innerHTML = '<i class="bi bi-check-circle"></i> Submit for Assessment';
+                }
+            }
+
+            displayAssessmentResults(result) {
+                // Show score display
+                document.getElementById('scoreDisplay').style.display = 'grid';
+                document.getElementById('pronunciationScore').textContent = Math.round(result.pronunciation_score);
+                document.getElementById('accuracyScore').textContent = Math.round(result.accuracy_score);
+                document.getElementById('fluencyScore').textContent = Math.round(result.fluency_score || 0);
+
+                if (result.prosody_score) {
+                    document.getElementById('prosodyScore').textContent = Math.round(result.prosody_score);
+                }
+
+                // Show feedback
+                if (result.feedback) {
+                    document.getElementById('feedbackSection').style.display = 'block';
+                    document.getElementById('feedbackText').textContent = result.feedback;
+                }
+
+                // Show improvement tips for words
+                if (result.improvement_tips && result.improvement_tips.length > 0) {
+                    this.displayImprovementTips(result.improvement_tips);
+                }
+
+                // Mark current item as completed for word practice
+                if (this.currentType === 'word') {
+                    this.markItemCompleted(this.currentIndex);
+                }
+
+                // Update progress chart
+                this.updateProgressChart(result);
+            }
+
+            displayImprovementTips(tips) {
+                const tipsSection = document.getElementById('tipsSection');
+                tipsSection.style.display = 'grid';
+                tipsSection.innerHTML = '';
+
+                tips.forEach(tip => {
+                    const tipCard = document.createElement('div');
+                    tipCard.className = 'tip-card';
+                    tipCard.innerHTML = `
+                        <div class="phoneme-display">${tip.phoneme}</div>
+                        <div>${tip.tip}</div>
+                        <small class="text-muted">Score: ${tip.score}</small>
+                    `;
+                    tipsSection.appendChild(tipCard);
+                });
+            }
+
+            navigatePrevious() {
+                if (this.currentIndex > 0) {
+                    this.currentIndex--;
+                    this.displayCurrentContent();
+                    if (this.currentType === 'word') {
+                        this.saveSessionState(); // Save state on navigation
+                    }
+                }
+            }
+
+            navigateNext() {
+                if (this.currentIndex < this.practiceContent.length - 1) {
+                    this.currentIndex++;
+                    this.displayCurrentContent();
+                    if (this.currentType === 'word') {
+                        this.saveSessionState(); // Save state on navigation
+                    }
+                }
+            }
+
+            updateProgressChart(result) {
+                // This would integrate with Chart.js to show progress
+                // For now, just logging
+                console.log('Updating progress chart with:', result);
+            }
+
+            async loadRecentSessions() {
+                try {
+                    const response = await fetch('/api/speaking/progress/recent-sessions?limit=5', {
+                        headers: {
+                            'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
+                        }
+                    });
+                    const data = await response.json();
+
+                    const sessionsDiv = document.getElementById('recentSessions');
+                    sessionsDiv.innerHTML = '';
+
+                    data.sessions.forEach(session => {
+                        const sessionCard = document.createElement('div');
+                        sessionCard.className = 'mb-3 p-3 border rounded';
+                        sessionCard.innerHTML = `
+                            <div class="d-flex justify-content-between">
+                                <span>${session.practice_type}</span>
+                                <span class="badge bg-primary">${Math.round(session.pronunciation_score)}%</span>
+                            </div>
+                            <small class="text-muted">${new Date(session.created_at).toLocaleDateString()}</small>
+                        `;
+                        sessionsDiv.appendChild(sessionCard);
+                    });
+                } catch (error) {
+                    console.error('Error loading recent sessions:', error);
+                }
+            }
+
+            showContentSourceSelection() {
+                // Hide other sections
+                document.getElementById('practiceContent').style.display = 'none';
+                document.getElementById('wordListView').style.display = 'none';
+
+                // Show content source selector
+                document.getElementById('contentSourceSelector').style.display = 'block';
+
+                // Add event listeners for source buttons
+                document.querySelectorAll('.source-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        // Remove active from all buttons
+                        document.querySelectorAll('.source-btn').forEach(b => b.classList.remove('active'));
+
+                        // Add active to clicked button
+                        btn.classList.add('active');
+
+                        // Load content with selected source
+                        const source = btn.dataset.source;
+                        this.loadContentWithSource(source);
+                    });
+                });
+            }
+
+            async loadContentWithSource(source) {
+                try {
+                    // Hide source selector
+                    document.getElementById('contentSourceSelector').style.display = 'none';
+
+                    // Load practice content with source
+                    await this.loadPracticeContent(source);
+
+                    // Show word list if it's word practice
+                    if (this.currentType === 'word') {
+                        this.showWordList();
+                    } else {
+                        // For sentences and paragraphs, go directly to practice
+                        this.displayCurrentContent();
+                        document.getElementById('practiceContent').style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Error loading content with source:', error);
+                }
+            }
+
+            showWordList() {
+                // Hide practice content
+                document.getElementById('practiceContent').style.display = 'none';
+
+                // Show word list view
+                document.getElementById('wordListView').style.display = 'block';
+
+                // Update title and count
+                const categoryName = this.currentCategory.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                const difficultyName = this.currentDifficulty.charAt(0).toUpperCase() + this.currentDifficulty.slice(1);
+                document.getElementById('listTitle').textContent = `${difficultyName} ${categoryName} Words`;
+                document.getElementById('listCount').textContent = this.practiceContent.length;
+
+                // Populate word list
+                const container = document.getElementById('wordListContainer');
+                container.innerHTML = '';
+
+                this.practiceContent.forEach((word, index) => {
+                    const wordCard = document.createElement('div');
+                    wordCard.className = 'col-md-6 col-lg-4';
+                    wordCard.innerHTML = `
+                        <div class="word-item" data-index="${index}">
+                            <div class="word-text">${word.content_text}</div>
+                            <div class="word-phonetic">${word.phonetic_transcription || ''}</div>
+                            <div class="word-translation">${word.chinese_translation || ''}</div>
+                        </div>
+                    `;
+                    container.appendChild(wordCard);
+                });
+
+                // Add event listener to start practice button
+                document.getElementById('startPracticeBtn').addEventListener('click', () => {
+                    this.startIndividualPractice();
+                });
+            }
+
+            startIndividualPractice() {
+                // Hide word list
+                document.getElementById('wordListView').style.display = 'none';
+
+                // Show practice content
+                document.getElementById('practiceContent').style.display = 'block';
+
+                // Start from first word
+                this.currentIndex = 0;
+                this.displayCurrentContent();
+            }
+
+            showTopicAnswerView() {
+                // Hide all other views
+                document.getElementById('practiceContent').style.display = 'none';
+                document.getElementById('wordListView').style.display = 'none';
+                document.getElementById('contentSourceSelector').style.display = 'none';
+
+                // Show topic answer view
+                document.getElementById('topicAnswerView').style.display = 'block';
+
+                // Load a topic
+                this.loadTopic();
+
+                // Add event listeners for topic answer buttons
+                this.initializeTopicEventListeners();
+            }
+
+            initializeTopicEventListeners() {
+                // Record button
+                document.getElementById('topicRecordBtn').addEventListener('click', async () => {
+                    if (!this.isRecording) {
+                        await this.startTopicRecording();
+                    } else {
+                        this.stopTopicRecording();
+                    }
+                });
+
+                // Play button
+                document.getElementById('topicPlayBtn').addEventListener('click', () => {
+                    this.playTopicRecording();
+                });
+
+                // Submit button
+                document.getElementById('topicSubmitBtn').addEventListener('click', () => {
+                    this.submitTopicAnswer();
+                });
+
+                // Retry button
+                document.getElementById('topicRetryBtn').addEventListener('click', () => {
+                    this.retryTopicRecording();
+                });
+            }
+
+            async loadTopic() {
+                try {
+                    // For now, use a simple topic. Later we'll add database/AI generation
+                    const sampleTopics = [
+                        "Describe your favorite hobby and explain why you enjoy it.",
+                        "Talk about a book that has influenced you and why it was important.",
+                        "Describe a place you would like to visit and explain your reasons.",
+                        "Discuss the advantages and disadvantages of social media.",
+                        "Talk about a skill you would like to learn and why it interests you.",
+                        "Describe your ideal job and what qualifications you would need.",
+                        "Discuss the importance of environmental protection in your country.",
+                        "Talk about a memorable experience from your childhood."
+                    ];
+
+                    const randomTopic = sampleTopics[Math.floor(Math.random() * sampleTopics.length)];
+                    this.currentTopic = randomTopic;
+                    document.getElementById('topicText').textContent = randomTopic;
+                } catch (error) {
+                    console.error('Error loading topic:', error);
+                    document.getElementById('topicText').textContent = "Describe your favorite hobby and explain why you enjoy it.";
+                }
+            }
+
+            // Traditional microphone workflow functions for Topic Answer
+            async startTopicRecording() {
+                try {
+                    // Check microphone support first
+                    const canRecord = await this.checkMicrophoneSupport();
+                    if (!canRecord) return;
+
+                    // Start audio recording
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    this.mediaRecorder = new MediaRecorder(stream);
+                    this.audioChunks = [];
+
+                    this.mediaRecorder.ondataavailable = event => {
+                        this.audioChunks.push(event.data);
+                    };
+
+                    this.mediaRecorder.onstop = () => {
+                        this.recordedBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+                        this.showTopicPlaybackControls();
+                    };
+
+                    this.mediaRecorder.start();
+                    this.isRecording = true;
+
+                    // Update UI
+                    const recordBtn = document.getElementById('topicRecordBtn');
+                    recordBtn.classList.remove('start');
+                    recordBtn.classList.add('recording');
+                    recordBtn.innerHTML = '<i class="bi bi-stop-fill"></i>';
+                    recordBtn.onclick = () => this.stopTopicRecording();
+
+                } catch (error) {
+                    console.error('Error starting recording:', error);
+                    this.showMicrophoneError('Could not start recording. Please check your microphone permissions.');
+                }
+            }
+
+            stopTopicRecording() {
+                if (this.mediaRecorder && this.isRecording) {
+                    this.mediaRecorder.stop();
+                    this.isRecording = false;
+
+                    // Clean up stream
+                    if (this.mediaRecorder.stream) {
+                        this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                    }
+
+                    // Reset record button
+                    const recordBtn = document.getElementById('topicRecordBtn');
+                    recordBtn.classList.remove('recording');
+                    recordBtn.classList.add('start');
+                    recordBtn.innerHTML = '<i class="bi bi-mic-fill"></i>';
+                    recordBtn.onclick = () => this.startTopicRecording();
+                }
+            }
+
+            showTopicPlaybackControls() {
+                const playbackControls = document.getElementById('topicPlaybackControls');
+                if (playbackControls) {
+                    playbackControls.style.display = 'block';
+                }
+            }
+
+            async playTopicRecording() {
+                if (this.recordedBlob) {
+                    const audioUrl = URL.createObjectURL(this.recordedBlob);
+                    const audio = new Audio(audioUrl);
+
+                    const playBtn = document.getElementById('topicPlayBtn');
+                    playBtn.innerHTML = '<i class="bi bi-pause-fill"></i> Playing...';
+                    playBtn.disabled = true;
+
+                    audio.onended = () => {
+                        playBtn.innerHTML = '<i class="bi bi-play-fill"></i> Play Recording';
+                        playBtn.disabled = false;
+                        URL.revokeObjectURL(audioUrl);
+                    };
+
+                    audio.play();
+                }
+            }
+
+            retryTopicRecording() {
+                // Hide playback controls
+                const playbackControls = document.getElementById('topicPlaybackControls');
+                if (playbackControls) {
+                    playbackControls.style.display = 'none';
+                }
+
+                // Clear recorded data
+                this.recordedBlob = null;
+                this.audioChunks = [];
+
+                // Reset record button to initial state
+                const recordBtn = document.getElementById('topicRecordBtn');
+                recordBtn.classList.remove('recording');
+                recordBtn.classList.add('start');
+                recordBtn.innerHTML = '<i class="bi bi-mic-fill"></i>';
+                recordBtn.onclick = () => this.startTopicRecording();
+            }
+
+            async submitTopicAnswer() {
+                if (!this.recordedBlob) {
+                    alert('No recording found. Please try again.');
+                    return;
+                }
+
+                try {
+                    // Create a session ID for this topic answer (simple timestamp-based ID)
+                    const sessionId = Date.now();
+
+                    // Submit for assessment
+                    const formData = new FormData();
+                    formData.append('audio', this.recordedBlob, 'topic_recording.webm');
+                    formData.append('topic_text', this.currentTopic || "Default topic response");
+                    formData.append('session_id', sessionId);
+                    formData.append('preparation_time', 90);
+                    formData.append('speaking_time', 60);
+
+                    document.getElementById('topicSubmitBtn').disabled = true;
+                    document.getElementById('topicSubmitBtn').innerHTML = '<i class="bi bi-hourglass-split"></i> Analyzing...';
+
+                    const response = await fetch('/api/speaking/topics/assess', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
+                        },
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    this.displayTopicResults(result);
+
+                } catch (error) {
+                    console.error('Error submitting topic answer:', error);
+                    alert('Error analyzing your response. Please try again.');
+                } finally {
+                    document.getElementById('topicSubmitBtn').disabled = false;
+                    document.getElementById('topicSubmitBtn').innerHTML = '<i class="bi bi-check-circle"></i> Submit for Assessment';
+                }
+            }
+
+
+            displayTopicResults(result) {
+                // Extract IELTS-style scores
+                const criteria = result.criteria || {};
+                const bandScore = result.band_score || 0;
+
+                // Create IELTS-style results display
+                const resultsHtml = `
+                    <div class="alert alert-success">
+                        <h6><i class="bi bi-check-circle"></i> IELTS Speaking Assessment Complete!</h6>
+
+                        <!-- Overall Band Score -->
+                        <div class="text-center mb-4">
+                            <div class="display-6 fw-bold text-primary">Band Score: ${bandScore.toFixed(1)}</div>
+                        </div>
+
+                        <!-- IELTS Criteria Scores -->
+                        <div class="row mt-3">
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <h6>Fluency & Coherence</h6>
+                                        <div class="h4 text-primary">${(criteria.fluency_coherence || 0).toFixed(1)}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <h6>Lexical Resource</h6>
+                                        <div class="h4 text-primary">${(criteria.lexical_resource || 0).toFixed(1)}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <h6>Grammatical Accuracy</h6>
+                                        <div class="h4 text-primary">${(criteria.grammatical_accuracy || 0).toFixed(1)}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <h6>Pronunciation</h6>
+                                        <div class="h4 text-primary">${(criteria.pronunciation || 0).toFixed(1)}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Feedback -->
+                        ${result.feedback ? `
+                        <div class="mt-4">
+                            <h6><i class="bi bi-lightbulb"></i> Feedback</h6>
+                            <p class="mb-0">${result.feedback}</p>
+                        </div>
+                        ` : ''}
+
+                        <!-- Improvement Suggestions -->
+                        ${result.improvement_suggestions ? `
+                        <div class="mt-3">
+                            <h6><i class="bi bi-arrow-up-circle"></i> Areas for Improvement</h6>
+                            <p class="mb-0">${result.improvement_suggestions}</p>
+                        </div>
+                        ` : ''}
+
+                        <!-- Action Buttons -->
+                        <div class="mt-4 text-center">
+                            <button class="btn btn-primary me-2" onclick="speakingPractice.loadNewTopic()">
+                                <i class="bi bi-arrow-repeat"></i> Try Another Topic
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="speakingPractice.showPracticeTypes()">
+                                <i class="bi bi-house"></i> Back to Practice Types
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                // Replace the topic answer view content with results
+                document.getElementById('topicAnswerView').innerHTML = `
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-trophy"></i> IELTS Speaking Results
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            ${resultsHtml}
+                        </div>
+                    </div>
+                `;
+            }
+
+            loadNewTopic() {
+                // Reset the Topic Answer view to initial state
+                this.selectPracticeType('topic');
+            }
+
+            showPracticeTypes() {
+                // Reset to show practice type selection
+                document.getElementById('topicAnswerView').style.display = 'none';
+                document.getElementById('practiceTypeSelector').style.display = 'grid';
+                document.getElementById('practiceContent').style.display = 'none';
+
+                // Clear any active selections
+                document.querySelectorAll('.practice-type-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+            }
+        }
+
+        // Initialize the application when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if user is authenticated
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                // Show login prompt instead of redirecting
+                const targetText = document.getElementById('targetText');
+                targetText.innerHTML = `
+                    <div style="text-align: center; padding: 40px;">
+                        <h3>Authentication Required</h3>
+                        <p>Please log in to access the Speaking Practice module</p>
+                        <a href="/login?redirect=${encodeURIComponent('/speaking')}" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </a>
+                        <br><br>
+                        <small class="text-muted">
+                            Don't have an account? Contact your teacher for access.
+                        </small>
+                    </div>
+                `;
+                // Hide other UI elements
+                document.querySelector('.category-selector').style.display = 'none';
+                document.querySelector('.difficulty-selector').style.display = 'none';
+                document.querySelector('.recording-controls').style.display = 'none';
+                document.querySelector('.navigation-buttons').style.display = 'none';
+                document.querySelector('.practice-counter').style.display = 'none';
+                return;
+            }
+
+            // Start the speaking practice application
+            window.speakingPractice = new SpeakingPractice();
+        });
+    </script>
+</body>
+</html>

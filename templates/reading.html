@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Reading - Language Arts Agent</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reading.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar for materials and stats -->
+            <div class="col-md-3 sidebar bg-light">
+                <div class="p-3">
+                    <!-- User info and navigation -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <small class="text-muted">
+                            <i class="bi bi-person-circle"></i> 
+                            <span id="userInfo"></span>
+                        </small>
+                        <div class="d-flex gap-2">
+                            <a href="/" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-house"></i> Home
+                            </a>
+                            <button class="btn btn-outline-secondary btn-sm" id="logoutBtn">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <h4 class="mb-4">
+                        <i class="bi bi-book"></i> Reading Materials
+                    </h4>
+                    
+                    <!-- Filters -->
+                    <div class="mb-3">
+                        <label for="categoryFilter" class="form-label">Category</label>
+                        <select class="form-select" id="categoryFilter">
+                            <option value="">All Categories</option>
+                            <option value="academic">Academic Papers</option>
+                            <option value="news">News Articles</option>
+                            <option value="literature">Literature</option>
+                            <option value="toefl">TOEFL Prep</option>
+                            <option value="ielts">IELTS Prep</option>
+                            <option value="business">Business English</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="difficultyFilter" class="form-label">Difficulty</label>
+                        <select class="form-select" id="difficultyFilter">
+                            <option value="">Auto-Select</option>
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Materials List -->
+                    <div id="materialsList" class="materials-list">
+                        <div class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading materials...</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Vocabulary Stats -->
+                    <div class="mt-4">
+                        <h5><i class="bi bi-graph-up"></i> Your Progress</h5>
+                        <div id="vocabularyStats" class="stats-container">
+                            <div class="stat-item">
+                                <div class="stat-number" id="wordsLookedUp">0</div>
+                                <div class="stat-label">Words Looked Up</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="wordsMastered">0</div>
+                                <div class="stat-label">Words Mastered</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="vocabularySize">0</div>
+                                <div class="stat-label">Vocabulary Size</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main reading area -->
+            <div class="col-md-9 main-content">
+                <div class="p-4">
+                    <!-- Reading header -->
+                    <div id="readingHeader" class="reading-header mb-4" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h2 id="textTitle">Select a text to start reading</h2>
+                                <div class="text-meta">
+                                    <span class="badge bg-primary" id="textDifficulty"></span>
+                                    <span class="badge bg-secondary" id="textCategory"></span>
+                                    <span class="text-muted" id="textWordCount"></span>
+                                    <span class="text-muted" id="estimatedTime"></span>
+                                </div>
+                            </div>
+                            <div class="reading-controls">
+                                <button class="btn btn-success" id="startReadingBtn">Start Reading</button>
+                                <button class="btn btn-warning" id="completeReadingBtn" style="display: none;">Complete Reading</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Reading Mode Selection -->
+                    <div id="readingModeSelection" class="alert alert-primary mb-4" style="display: none;">
+                        <h5><i class="bi bi-gear"></i> Choose Your Reading Mode</h5>
+                        <p class="mb-3">Select how you want to read this article:</p>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <i class="bi bi-lock-fill text-warning mb-2" style="font-size: 2rem;"></i>
+                                        <h6 class="card-title">Lock Mode</h6>
+                                        <p class="card-text small">
+                                            Read without any assistance. No word definitions, no AI help. 
+                                            Test your understanding with 5 comprehension questions at the end.
+                                        </p>
+                                        <button class="btn btn-warning" id="lockModeBtn">
+                                            <i class="bi bi-lock"></i> Lock Mode
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <i class="bi bi-robot text-primary mb-2" style="font-size: 2rem;"></i>
+                                        <h6 class="card-title">AI Assisted Mode</h6>
+                                        <p class="card-text small">
+                                            Read with full assistance. Click words for definitions, use AI chatbot, 
+                                            and get help whenever you need it.
+                                        </p>
+                                        <button class="btn btn-primary" id="aiModeBtn">
+                                            <i class="bi bi-robot"></i> AI Mode
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress bar -->
+                    <div id="progressContainer" class="mb-4" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="progress">
+                                    <div class="progress-bar" id="readingProgress" role="progressbar" 
+                                         style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                        0% Complete
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <small class="text-muted">
+                                    <i class="bi bi-clock"></i> <span id="readingTime">0:00</span> | 
+                                    <i class="bi bi-speedometer2"></i> <span id="currentWPM">0</span> WPM
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Instructions -->
+                    <div id="instructions" class="alert alert-info">
+                        <h5><i class="bi bi-info-circle"></i> How to Use Interactive Reading</h5>
+                        <ul class="mb-0">
+                            <li><strong>Click on any word</strong> to see its definition, pronunciation, and examples</li>
+                            <li><strong>Double-click</strong> to get Chinese translation</li>
+                            <li><strong>Right-click on words</strong> to ask the AI chatbot for detailed explanations</li>
+                            <li><strong>Use the AI assistant</strong> (robot icon, bottom-right) for reading help and questions</li>
+                            <li><strong>Your reading speed</strong> and vocabulary learning are tracked automatically</li>
+                            <li><strong>Complete the reading</strong> to get comprehension questions and personalized feedback</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Interactive text area -->
+                    <div id="interactiveText" class="interactive-text-container">
+                        <div class="text-center text-muted">
+                            <i class="bi bi-book-half" style="font-size: 3rem;"></i>
+                            <p class="mt-3">Select a reading material from the sidebar to begin</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Word definition modal -->
+                    <div class="modal fade" id="wordModal" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">
+                                        <i class="bi bi-book"></i> <span id="modalWord">Word</span>
+                                        <button type="button" class="btn btn-sm btn-outline-primary ms-2" id="toggleChineseBtn">
+                                            中文
+                                        </button>
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div id="wordDefinition" class="mb-3">
+                                        <h6>Definition</h6>
+                                        <p id="definitionText"></p>
+                                    </div>
+                                    
+                                    <div id="wordPronunciation" class="mb-3">
+                                        <h6>Pronunciation</h6>
+                                        <p class="pronunciation" id="pronunciationText"></p>
+                                    </div>
+                                    
+                                    <div id="wordExamples" class="mb-3">
+                                        <h6>Examples</h6>
+                                        <ul id="examplesList"></ul>
+                                    </div>
+                                    
+                                    <div id="wordSynonyms" class="mb-3">
+                                        <h6>Related Words</h6>
+                                        <div id="synonymsList" class="badge-container"></div>
+                                    </div>
+                                    
+                                    <div id="chineseTranslation" class="alert alert-light" style="display: none;">
+                                        <h6>Chinese Translation</h6>
+                                        <p id="chineseText"></p>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <div class="me-auto">
+                                        <small class="text-muted">
+                                            Difficulty: <span class="badge bg-secondary" id="wordDifficulty"></span> | 
+                                            Times looked up: <span id="lookupCount"></span>
+                                        </small>
+                                    </div>
+                                    <button type="button" class="btn btn-success" id="markMasteredBtn">
+                                        <i class="bi bi-check-circle"></i> Mark as Mastered
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Comprehension Questions Modal -->
+                    <div class="modal fade" id="questionsModal" tabindex="-1">
+                        <div class="modal-dialog modal-xl">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">
+                                        <i class="bi bi-question-circle"></i> Comprehension Questions
+                                    </h5>
+                                    <div class="ms-auto text-muted">
+                                        <small>Question <span id="currentQuestionNum">1</span> of <span id="totalQuestions">5</span></small>
+                                    </div>
+                                </div>
+                                <div class="modal-body">
+                                    <div id="questionsContainer">
+                                        <!-- Questions will be loaded here -->
+                                        <div class="text-center">
+                                            <div class="spinner-border" role="status">
+                                                <span class="visually-hidden">Loading questions...</span>
+                                            </div>
+                                            <p class="mt-2">Generating comprehension questions...</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Question Navigation -->
+                                    <div class="d-flex justify-content-between align-items-center mt-4" id="questionNavigation" style="display: none;">
+                                        <button class="btn btn-outline-secondary" id="prevQuestionBtn" disabled>
+                                            <i class="bi bi-arrow-left"></i> Previous
+                                        </button>
+                                        
+                                        <div class="btn-group" role="group" id="questionNumbers">
+                                            <!-- Question number buttons will be here -->
+                                        </div>
+                                        
+                                        <button class="btn btn-outline-secondary" id="nextQuestionBtn">
+                                            Next <i class="bi bi-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <div class="me-auto">
+                                        <small class="text-muted">
+                                            Progress: <span id="answeredCount">0</span> / <span id="totalQuestionsFooter">5</span> answered
+                                        </small>
+                                    </div>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-success" id="submitQuestionsBtn" disabled>
+                                        <i class="bi bi-check-circle"></i> Submit Answers
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Modal -->
+                    <div class="modal fade" id="resultsModal" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">
+                                        <i class="bi bi-trophy"></i> Reading Comprehension Results
+                                    </h5>
+                                </div>
+                                <div class="modal-body">
+                                    <div id="resultsContainer">
+                                        <!-- Results will be shown here -->
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" id="selectNewArticleBtn">
+                                        <i class="bi bi-book"></i> Read Another Article
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating AI Chatbot -->
+    <div id="readingChatbot" class="reading-chatbot" style="display: none;">
+        <!-- Chatbot Toggle Button -->
+        <div class="chatbot-toggle" id="chatbotToggle">
+            <i class="bi bi-robot"></i>
+            <span class="chatbot-badge" id="chatbotBadge">0</span>
+        </div>
+        
+        <!-- Chatbot Window -->
+        <div class="chatbot-window" id="chatbotWindow" style="display: none;">
+            <div class="chatbot-header">
+                <div class="chatbot-title">
+                    <i class="bi bi-robot"></i>
+                    <span>Reading Assistant</span>
+                </div>
+                <div class="chatbot-controls">
+                    <button class="btn btn-sm btn-outline-light" id="clearChatBtn" title="Clear conversation">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-light" id="minimizeChatBtn" title="Minimize">
+                        <i class="bi bi-dash"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="chatbot-body">
+                <div class="chatbot-messages" id="chatbotMessages">
+                    <div class="chatbot-message assistant-message">
+                        <div class="message-avatar">
+                            <i class="bi bi-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            <p><strong>Hello! I'm your English teacher! 👋</strong></p>
+                            <p>Ask me about <strong>anything</strong> English-related:</p>
+                            <ul class="help-list">
+                                <li>📚 Vocabulary & grammar</li>
+                                <li>🗣️ Speaking & conversations</li>
+                                <li>🌍 Culture & customs</li>
+                                <li>📝 Writing & formal language</li>
+                                <li>🎯 Exam preparation</li>
+                                <li>💬 Daily English & slang</li>
+                            </ul>
+                            <p><strong>Tip:</strong> Select text and I'll explain it! 😊</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Action Buttons -->
+                <div class="chatbot-quick-actions">
+                    <button class="btn btn-sm btn-outline-primary quick-action-btn" data-action="tips">
+                        <i class="bi bi-lightbulb"></i> Learning Tips
+                    </button>
+                    <button class="btn btn-sm btn-outline-success quick-action-btn" data-action="explain">
+                        <i class="bi bi-chat-dots"></i> Ask Anything
+                    </button>
+                    <button class="btn btn-sm btn-outline-info quick-action-btn" data-action="summarize">
+                        <i class="bi bi-journal-text"></i> Text Summary
+                    </button>
+                </div>
+            </div>
+            
+            <div class="chatbot-footer">
+                <div class="chatbot-input-group">
+                    <input type="text" class="form-control" id="chatbotInput" 
+                           placeholder="Ask me about the reading..." maxlength="500">
+                    <button class="btn btn-primary" id="sendChatBtn" type="button">
+                        <i class="bi bi-send"></i>
+                    </button>
+                </div>
+                <div class="chatbot-typing" id="chatbotTyping" style="display: none;">
+                    <div class="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <small class="text-muted">AI is thinking...</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/reading.js') }}"></script>
+</body>
+</html>

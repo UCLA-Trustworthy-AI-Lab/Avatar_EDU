@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Writing Module Quick Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .test-section { background: #f8f9fa; padding: 20px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        button { margin: 5px; padding: 10px 15px; }
+        #iframe-container { margin-top: 20px; }
+        iframe { width: 100%; height: 600px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Writing Module Debug Test</h1>
+
+        <!-- Step 1: Login -->
+        <div class="test-section">
+            <h3>Step 1: Login</h3>
+            <p>Click this button to automatically login with demo credentials:</p>
+            <button onclick="performLogin()" id="loginBtn">🔑 Login as demo_student</button>
+            <div id="loginStatus" class="test-section info">Not logged in</div>
+        </div>
+
+        <!-- Step 2: Test Writing API -->
+        <div class="test-section">
+            <h3>Step 2: Test Writing API</h3>
+            <button onclick="testWritingAPI()" id="apiBtn" disabled>📝 Test Writing Topics API</button>
+            <div id="apiStatus" class="test-section info">Login first</div>
+        </div>
+
+        <!-- Step 3: Open Writing Module -->
+        <div class="test-section">
+            <h3>Step 3: Open Writing Module</h3>
+            <button onclick="openWritingModule()" id="moduleBtn" disabled>🚀 Open Writing Module</button>
+            <div id="moduleStatus" class="test-section info">Complete previous steps first</div>
+        </div>
+
+        <!-- Step 4: View Writing Module -->
+        <div id="iframe-container" style="display: none;">
+            <h3>Step 4: Writing Module (should show topics)</h3>
+            <iframe id="writingFrame" src=""></iframe>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:5001';
+        let authToken = null;
+
+        async function performLogin() {
+            const loginBtn = document.getElementById('loginBtn');
+            const loginStatus = document.getElementById('loginStatus');
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = '🔄 Logging in...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'demo_student',
+                        password: 'password123'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.access_token) {
+                    authToken = data.access_token;
+
+                    // Store in localStorage so the writing module can use it
+                    localStorage.setItem('auth_token', data.access_token);
+                    localStorage.setItem('username', data.username);
+                    localStorage.setItem('user_id', data.user_id);
+                    localStorage.setItem('user_type', data.user_type);
+
+                    loginStatus.className = 'test-section success';
+                    loginStatus.innerHTML = `
+                        ✅ <strong>Login Successful!</strong><br>
+                        Username: ${data.username}<br>
+                        Token stored in localStorage
+                    `;
+
+                    loginBtn.textContent = '✅ Logged In';
+                    document.getElementById('apiBtn').disabled = false;
+
+                } else {
+                    throw new Error(data.error || 'Login failed');
+                }
+            } catch (error) {
+                loginStatus.className = 'test-section error';
+                loginStatus.innerHTML = `❌ Login failed: ${error.message}`;
+                loginBtn.disabled = false;
+                loginBtn.textContent = '🔑 Retry Login';
+            }
+        }
+
+        async function testWritingAPI() {
+            const apiBtn = document.getElementById('apiBtn');
+            const apiStatus = document.getElementById('apiStatus');
+
+            apiBtn.disabled = true;
+            apiBtn.textContent = '🔄 Testing API...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/writing/topics`, {
+                    headers: {
+                        'Authorization': 'Bearer ' + authToken
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const topicCount = Object.keys(data.topics).length;
+                    const totalTopics = Object.values(data.topics).reduce((sum, topics) => sum + topics.length, 0);
+
+                    apiStatus.className = 'test-section success';
+                    apiStatus.innerHTML = `
+                        ✅ <strong>API Test Successful!</strong><br>
+                        Categories: ${topicCount}<br>
+                        Total Topics: ${totalTopics}<br>
+                        ➡️ API is working, ready to test UI
+                    `;
+
+                    apiBtn.textContent = '✅ API Working';
+                    document.getElementById('moduleBtn').disabled = false;
+
+                } else {
+                    throw new Error(`API Error: ${data.error || response.status}`);
+                }
+            } catch (error) {
+                apiStatus.className = 'test-section error';
+                apiStatus.innerHTML = `❌ API test failed: ${error.message}`;
+                apiBtn.disabled = false;
+                apiBtn.textContent = '📝 Retry API Test';
+            }
+        }
+
+        function openWritingModule() {
+            const moduleBtn = document.getElementById('moduleBtn');
+            const moduleStatus = document.getElementById('moduleStatus');
+            const iframeContainer = document.getElementById('iframe-container');
+            const writingFrame = document.getElementById('writingFrame');
+
+            moduleStatus.className = 'test-section success';
+            moduleStatus.innerHTML = `
+                ✅ <strong>Opening Writing Module</strong><br>
+                If you see topics below and can click "Argumentative Essay", the issue is fixed!<br>
+                If topics are grayed out, the authentication issue persists.
+            `;
+
+            // Load the writing module in an iframe
+            writingFrame.src = `${API_BASE}/writing`;
+            iframeContainer.style.display = 'block';
+
+            moduleBtn.textContent = '✅ Module Loaded';
+            moduleBtn.disabled = true;
+        }
+
+        // Check initial auth status
+        window.addEventListener('load', () => {
+            const existingToken = localStorage.getItem('auth_token');
+            if (existingToken) {
+                authToken = existingToken;
+                document.getElementById('loginStatus').className = 'test-section success';
+                document.getElementById('loginStatus').innerHTML = '✅ Already logged in (token found)';
+                document.getElementById('loginBtn').textContent = '✅ Already Logged In';
+                document.getElementById('apiBtn').disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

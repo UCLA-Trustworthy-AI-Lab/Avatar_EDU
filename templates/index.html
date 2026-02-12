@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Arts Agent - English Learning Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-book-half text-primary"></i>
+                Language Arts Agent
+            </a>
+            
+            <!-- Authentication buttons -->
+            <div class="navbar-nav ms-auto">
+                <!-- Show when not logged in -->
+                <div id="authButtons" class="d-flex gap-2">
+                    <a href="/login" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-box-arrow-in-right"></i> Login
+                    </a>
+                </div>
+                
+                <!-- Show when logged in -->
+                <div id="userButtons" class="d-flex gap-2 align-items-center" style="display: none !important;">
+                    <span class="text-muted">
+                        <i class="bi bi-person-circle"></i>
+                        <span id="navUserInfo">Loading...</span>
+                    </span>
+                    <button class="btn btn-outline-secondary btn-sm" id="navLogoutBtn">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <!-- Welcome section for logged-in users -->
+                <div id="welcomeSection" class="text-center mb-5" style="display: none;">
+                    <h1 class="display-5 mb-3">
+                        Welcome back, <span id="welcomeUsername">Student</span>!
+                    </h1>
+                    <p class="lead">Choose a learning module to continue your English language journey</p>
+                </div>
+                
+                <!-- Main title for non-logged-in users -->
+                <div id="mainTitle" class="text-center mb-5">
+                    <h1 class="display-4 mb-3">
+                        <i class="bi bi-book-half text-primary"></i>
+                        Language Arts Agent
+                    </h1>
+                    <p class="lead">Advanced English learning platform for Chinese high school and college students</p>
+                    <div class="mt-4">
+                        <a href="/login" class="btn btn-primary btn-lg">
+                            <i class="bi bi-box-arrow-in-right"></i> Login to Get Started
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- First row: 3 modules -->
+                <div class="row g-4 mb-4">
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-book-half display-1 text-primary mb-3"></i>
+                                <h5 class="card-title">Interactive Reading</h5>
+                                <p class="card-text">
+                                    Click-to-learn vocabulary system with academic essays, 
+                                    news articles, and exam preparation materials.
+                                </p>
+                                <a href="/reading" class="btn btn-primary module-btn">
+                                    <i class="bi bi-arrow-right"></i> Start Reading
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100 border-2 border-success">
+                            <div class="card-body text-center">
+                                <i class="bi bi-mic display-1 text-success mb-3"></i>
+                                <h5 class="card-title">Speaking Practice</h5>
+                                <p class="card-text">
+                                    Three-tier pronunciation system: Words, Sentences, and Paragraphs
+                                    with AI-powered pronunciation assessment and feedback.
+                                </p>
+                                <a href="/speaking" class="btn btn-success module-btn">
+                                    <i class="bi bi-arrow-right"></i> Start Speaking
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-headphones display-1 text-info mb-3"></i>
+                                <h5 class="card-title">Listening Skills</h5>
+                                <p class="card-text">
+                                    Audio comprehension with dynamic questions 
+                                    and real-time assessment for skill development.
+                                </p>
+                                <a href="/listening" class="btn btn-info module-btn">
+                                    <i class="bi bi-arrow-right"></i> Start Listening
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Second row: 2 modules -->
+                <div class="row g-4">
+                    <div class="col-lg-6 col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-pencil-square display-1 text-warning mb-3"></i>
+                                <h5 class="card-title">Writing Assistant</h5>
+                                <p class="card-text">
+                                    AI-powered feedback on grammar, style, and content 
+                                    with OCR support for handwritten text analysis.
+                                </p>
+                                <a href="/writing" class="btn btn-warning module-btn">
+                                    <i class="bi bi-arrow-right"></i> Start Writing
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6 col-md-6">
+                        <div class="card h-100 border-2 border-primary">
+                            <div class="card-body text-center">
+                                <i class="bi bi-person-video3 display-1 text-purple mb-3" style="color: #6f42c1 !important;"></i>
+                                <h5 class="card-title">Avatar Interaction</h5>
+                                <p class="card-text">
+                                    Real-time conversation with AI avatars using streaming technology 
+                                    for immersive English practice and natural dialogue.
+                                </p>
+                                <a href="http://localhost:3000" class="btn btn-outline-primary module-btn" target="_blank">
+                                    <i class="bi bi-play-circle"></i> Start Conversation
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-5">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="bi bi-target"></i> Designed for Chinese Students
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h6>Target Audience</h6>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-success"></i> Ages 16-20</li>
+                                        <li><i class="bi bi-check-circle text-success"></i> High school students</li>
+                                        <li><i class="bi bi-check-circle text-success"></i> College students</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6>Exam Preparation</h6>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-success"></i> TOEFL preparation</li>
+                                        <li><i class="bi bi-check-circle text-success"></i> IELTS preparation</li>
+                                        <li><i class="bi bi-check-circle text-success"></i> GRE preparation</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6>Features</h6>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-success"></i> Chinese translation support</li>
+                                        <li><i class="bi bi-check-circle text-success"></i> Academic vocabulary focus</li>
+                                        <li><i class="bi bi-check-circle text-success"></i> Progress analytics</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <p class="text-muted">
+                        <i class="bi bi-info-circle"></i>
+                        Available modules: Interactive Reading, Speaking Practice, Listening Skills, and Writing Assistant.
+                        Avatar Interaction available at localhost:3000.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        class HomePageAuth {
+            constructor() {
+                this.init();
+            }
+            
+            init() {
+                this.checkAuthentication();
+                this.bindEvents();
+            }
+            
+            checkAuthentication() {
+                const token = localStorage.getItem('auth_token');
+                const username = localStorage.getItem('username');
+                
+                if (token && username) {
+                    this.showAuthenticatedView(username);
+                } else {
+                    this.showGuestView();
+                }
+            }
+            
+            showAuthenticatedView(username) {
+                // Hide guest elements
+                document.getElementById('authButtons').style.display = 'none';
+                document.getElementById('mainTitle').style.display = 'none';
+                
+                // Show authenticated elements
+                document.getElementById('userButtons').style.display = 'flex';
+                document.getElementById('welcomeSection').style.display = 'block';
+                
+                // Update user info
+                document.getElementById('navUserInfo').textContent = username;
+                document.getElementById('welcomeUsername').textContent = username;
+                
+                // Enable module buttons
+                this.enableModuleButtons();
+            }
+            
+            showGuestView() {
+                // Show guest elements
+                document.getElementById('authButtons').style.display = 'flex';
+                document.getElementById('mainTitle').style.display = 'block';
+                
+                // Hide authenticated elements
+                document.getElementById('userButtons').style.display = 'none';
+                document.getElementById('welcomeSection').style.display = 'none';
+                
+                // Disable module buttons (redirect to login)
+                this.disableModuleButtons();
+            }
+            
+            enableModuleButtons() {
+                // Module buttons work normally when authenticated
+                const moduleButtons = document.querySelectorAll('.module-btn');
+                moduleButtons.forEach(btn => {
+                    btn.onclick = null; // Remove any click handlers
+                });
+            }
+            
+            disableModuleButtons() {
+                // Module buttons redirect to login when not authenticated
+                const moduleButtons = document.querySelectorAll('.module-btn');
+                moduleButtons.forEach(btn => {
+                    btn.onclick = (e) => {
+                        e.preventDefault();
+                        const targetUrl = encodeURIComponent(btn.getAttribute('href'));
+                        window.location.href = `/login?redirect=${targetUrl}`;
+                    };
+                });
+            }
+            
+            bindEvents() {
+                // Logout button
+                const logoutBtn = document.getElementById('navLogoutBtn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', () => {
+                        this.logout();
+                    });
+                }
+            }
+            
+            logout() {
+                // Clear stored authentication data
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('user_id');
+                localStorage.removeItem('username');
+                localStorage.removeItem('user_type');
+                
+                // Refresh the page to show guest view
+                window.location.reload();
+            }
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new HomePageAuth();
+        });
+    </script>
+</body>
+</html>

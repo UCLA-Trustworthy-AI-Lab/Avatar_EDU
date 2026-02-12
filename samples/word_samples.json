@@ -1,0 +1,158 @@
+{
+  "beginner": [
+    {
+      "content_text": "hello",
+      "phonetic_transcription": "/həˈloʊ/",
+      "context_hint": "A common greeting used when meeting someone"
+    },
+    {
+      "content_text": "water",
+      "phonetic_transcription": "/ˈwɔːtər/",
+      "context_hint": "A clear liquid that we drink to stay alive"
+    },
+    {
+      "content_text": "happy",
+      "phonetic_transcription": "/ˈhæpi/",
+      "context_hint": "Feeling pleased or satisfied"
+    },
+    {
+      "content_text": "friend",
+      "phonetic_transcription": "/frend/",
+      "context_hint": "A person you know well and like"
+    },
+    {
+      "content_text": "house",
+      "phonetic_transcription": "/haʊs/",
+      "context_hint": "A building where people live"
+    },
+    {
+      "content_text": "school",
+      "phonetic_transcription": "/skuːl/",
+      "context_hint": "A place where children go to learn"
+    },
+    {
+      "content_text": "family",
+      "phonetic_transcription": "/ˈfæməli/",
+      "context_hint": "Parents and their children living together"
+    },
+    {
+      "content_text": "food",
+      "phonetic_transcription": "/fuːd/",
+      "context_hint": "Things that people eat to stay healthy"
+    },
+    {
+      "content_text": "work",
+      "phonetic_transcription": "/wɜːrk/",
+      "context_hint": "Activity involving mental or physical effort"
+    },
+    {
+      "content_text": "time",
+      "phonetic_transcription": "/taɪm/",
+      "context_hint": "The indefinite continued progress of existence"
+    }
+  ],
+  "intermediate": [
+    {
+      "content_text": "university",
+      "phonetic_transcription": "/ˌjuːnɪˈvɜːrsəti/",
+      "context_hint": "An institution of higher education and research"
+    },
+    {
+      "content_text": "opportunity",
+      "phonetic_transcription": "/ˌɑːpərˈtuːnəti/",
+      "context_hint": "A favorable chance or situation"
+    },
+    {
+      "content_text": "environment",
+      "phonetic_transcription": "/ɪnˈvaɪrənmənt/",
+      "context_hint": "The natural world surrounding us"
+    },
+    {
+      "content_text": "development",
+      "phonetic_transcription": "/dɪˈveləpmənt/",
+      "context_hint": "The process of growing or improving"
+    },
+    {
+      "content_text": "technology",
+      "phonetic_transcription": "/tekˈnɑːlədʒi/",
+      "context_hint": "Scientific knowledge applied to practical purposes"
+    },
+    {
+      "content_text": "communication",
+      "phonetic_transcription": "/kəˌmjuːnɪˈkeɪʃn/",
+      "context_hint": "The exchange of information between people"
+    },
+    {
+      "content_text": "responsibility",
+      "phonetic_transcription": "/rɪˌspɑːnsəˈbɪləti/",
+      "context_hint": "The state of being accountable for something"
+    },
+    {
+      "content_text": "achievement",
+      "phonetic_transcription": "/əˈtʃiːvmənt/",
+      "context_hint": "A successful completion of something"
+    },
+    {
+      "content_text": "experience",
+      "phonetic_transcription": "/ɪkˈspɪriəns/",
+      "context_hint": "Knowledge gained through involvement in events"
+    },
+    {
+      "content_text": "creativity",
+      "phonetic_transcription": "/ˌkriːeɪˈtɪvəti/",
+      "context_hint": "The ability to produce original ideas"
+    }
+  ],
+  "advanced": [
+    {
+      "content_text": "entrepreneurship",
+      "phonetic_transcription": "/ˌɑːntrəprəˈnɜːrʃɪp/",
+      "context_hint": "The activity of setting up and running a business"
+    },
+    {
+      "content_text": "sustainability",
+      "phonetic_transcription": "/səˌsteɪnəˈbɪləti/",
+      "context_hint": "Meeting present needs without compromising future generations"
+    },
+    {
+      "content_text": "consciousness",
+      "phonetic_transcription": "/ˈkɑːnʃəsnəs/",
+      "context_hint": "The state of being aware and responsive"
+    },
+    {
+      "content_text": "infrastructure",
+      "phonetic_transcription": "/ˈɪnfrəstrʌktʃər/",
+      "context_hint": "Basic physical systems of a business or nation"
+    },
+    {
+      "content_text": "methodology",
+      "phonetic_transcription": "/ˌmeθəˈdɑːlədʒi/",
+      "context_hint": "A system of methods used in research or activity"
+    },
+    {
+      "content_text": "contemporary",
+      "phonetic_transcription": "/kənˈtempəreri/",
+      "context_hint": "Belonging to or occurring in the present time"
+    },
+    {
+      "content_text": "philosophical",
+      "phonetic_transcription": "/ˌfɪləˈsɑːfɪkl/",
+      "context_hint": "Relating to the study of fundamental questions"
+    },
+    {
+      "content_text": "interdisciplinary",
+      "phonetic_transcription": "/ˌɪntərdɪsəˈplɪneri/",
+      "context_hint": "Combining multiple academic disciplines"
+    },
+    {
+      "content_text": "unprecedented",
+      "phonetic_transcription": "/ʌnˈpresɪdentɪd/",
+      "context_hint": "Never done or known before"
+    },
+    {
+      "content_text": "anthropological",
+      "phonetic_transcription": "/ˌænθrəpəˈlɑːdʒɪkl/",
+      "context_hint": "Relating to the study of human societies"
+    }
+  ]
+}

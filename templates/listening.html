@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listening Practice - Language Arts Agent</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .mode-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .mode-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .mode-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .mode-card.active {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, #f8faff 0%, #e0e7ff 100%);
+        }
+
+        .mode-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .content-area {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            min-height: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .topic-selector {
+            margin-bottom: 30px;
+        }
+
+        .topic-card {
+            background: #f8faff;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .topic-card:hover {
+            border-color: var(--primary-color);
+            background: #f0f4ff;
+        }
+
+        .topic-card.selected {
+            border-color: var(--primary-color);
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .audio-player-section {
+            background: #f8faff;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .audio-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .play-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            background: var(--primary-color);
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .play-btn:hover {
+            background: var(--secondary-color);
+            transform: scale(1.05);
+        }
+
+        .play-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-color);
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .question-section {
+            margin-top: 30px;
+        }
+
+        .question-card {
+            background: #f8faff;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .question-timer {
+            float: right;
+            background: var(--warning-color);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .question-timer.danger {
+            background: var(--danger-color);
+        }
+
+        .answer-options {
+            margin-top: 20px;
+        }
+
+        .answer-option {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .answer-option:hover {
+            border-color: var(--primary-color);
+            background: #f0f4ff;
+        }
+
+        .answer-option.selected {
+            border-color: var(--primary-color);
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .answer-option.correct {
+            border-color: var(--success-color);
+            background: var(--success-color);
+            color: white;
+        }
+
+        .answer-option.incorrect {
+            border-color: var(--danger-color);
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .control-buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            padding: 12px 30px;
+            font-weight: 600;
+            border-radius: 8px;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .results-section {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .score-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .score-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .score-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .hide {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header-section">
+            <h1><i class="bi bi-headphones"></i> Listening Practice</h1>
+            <p class="lead">Improve your English listening skills with interactive audio content</p>
+        </div>
+
+        <!-- Mode Selection -->
+        <div id="modeSelector" class="mode-selector">
+            <div class="mode-card" onclick="listeningPractice.selectMode('practice')">
+                <div class="mode-icon">
+                    <i class="bi bi-play-circle"></i>
+                </div>
+                <h4>Practice Mode</h4>
+                <p>Listen as many times as you want, then answer questions</p>
+            </div>
+            <div class="mode-card" onclick="listeningPractice.selectMode('test')">
+                <div class="mode-icon">
+                    <i class="bi bi-stopwatch"></i>
+                </div>
+                <h4>Test Mode</h4>
+                <p>Listen once, answer questions with time limits</p>
+            </div>
+        </div>
+
+        <!-- Topic Selection -->
+        <div id="topicSelector" class="content-area hide">
+            <h3><i class="bi bi-list-ul"></i> Select a Topic</h3>
+            <div id="topicList" class="topic-selector">
+                <p class="text-center">Loading topics...</p>
+            </div>
+        </div>
+
+        <!-- Listening Content -->
+        <div id="listeningContent" class="content-area hide">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 id="contentTitle"><i class="bi bi-headphones"></i> Audio Content</h3>
+                <span id="modeIndicator" class="badge bg-primary fs-6"></span>
+            </div>
+
+            <!-- Audio Player -->
+            <div class="audio-player-section">
+                <h5 id="audioTitle">Loading audio...</h5>
+                <p id="audioDescription" class="text-muted"></p>
+
+                <div class="audio-controls">
+                    <button id="playBtn" class="play-btn" onclick="listeningPractice.toggleAudio()">
+                        <i class="bi bi-play-fill"></i>
+                    </button>
+                </div>
+
+                <div class="progress-bar-container">
+                    <div class="progress-bar" onclick="listeningPractice.seekAudio(event)">
+                        <div id="progressFill" class="progress-fill"></div>
+                    </div>
+                    <div class="time-display">
+                        <span id="currentTime">0:00</span>
+                        <span id="totalTime">0:00</span>
+                    </div>
+                </div>
+
+                <div id="practiceControls" class="mt-3">
+                    <button class="btn btn-outline-primary me-2" onclick="listeningPractice.rewind()">
+                        <i class="bi bi-skip-backward"></i> -10s
+                    </button>
+                    <button class="btn btn-outline-primary me-2" onclick="listeningPractice.playbackSpeed('slow')">
+                        <i class="bi bi-speedometer"></i> 0.8x
+                    </button>
+                    <button class="btn btn-outline-primary me-2" onclick="listeningPractice.playbackSpeed('normal')">
+                        <i class="bi bi-speedometer2"></i> 1x
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="listeningPractice.fastForward()">
+                        <i class="bi bi-skip-forward"></i> +10s
+                    </button>
+                </div>
+            </div>
+
+            <!-- Questions Section -->
+            <div id="questionsSection" class="question-section hide">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4><i class="bi bi-question-circle"></i> Questions</h4>
+                    <div id="questionTimer" class="question-timer hide"></div>
+                </div>
+
+                <div id="questionContainer">
+                    <!-- Questions will be loaded here -->
+                </div>
+
+                <div class="control-buttons">
+                    <button id="showQuestionsBtn" class="btn btn-primary" onclick="listeningPractice.showQuestions()">
+                        <i class="bi bi-play-circle"></i> Start Questions
+                    </button>
+                    <button id="nextQuestionBtn" class="btn btn-primary hide" onclick="listeningPractice.nextQuestion()">
+                        <i class="bi bi-arrow-right"></i> Next Question
+                    </button>
+                    <button id="submitAnswersBtn" class="btn btn-success hide" onclick="listeningPractice.submitAnswers()">
+                        <i class="bi bi-check-circle"></i> Submit Answers
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="resultsSection" class="content-area hide">
+            <div class="results-section">
+                <h2><i class="bi bi-trophy"></i> Your Results</h2>
+                <div class="score-display" id="overallScore">85%</div>
+
+                <div class="score-breakdown">
+                    <div class="score-item">
+                        <h5>Correct Answers</h5>
+                        <div class="h3 text-success" id="correctCount">8/10</div>
+                    </div>
+                    <div class="score-item">
+                        <h5>Time Taken</h5>
+                        <div class="h3 text-primary" id="timeTaken">5:42</div>
+                    </div>
+                    <div class="score-item">
+                        <h5>Comprehension Level</h5>
+                        <div class="h3 text-warning" id="comprehensionLevel">Advanced</div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h5><i class="bi bi-lightbulb"></i> Feedback</h5>
+                    <div id="feedbackText" class="alert alert-info">
+                        Great job! Your listening comprehension is excellent. Focus on detail-oriented questions for improvement.
+                    </div>
+                </div>
+
+                <div class="control-buttons">
+                    <button class="btn btn-primary me-2" onclick="listeningPractice.tryAgain()">
+                        <i class="bi bi-arrow-repeat"></i> Try Another Audio
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="listeningPractice.backToHome()">
+                        <i class="bi bi-house"></i> Back to Home
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Audio Element -->
+    <audio id="audioPlayer" preload="metadata"></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        class ListeningPractice {
+            constructor() {
+                this.currentMode = null;
+                this.currentTopic = null;
+                this.currentAudio = null;
+                this.questions = [];
+                this.currentQuestionIndex = 0;
+                this.answers = [];
+                this.questionTimer = null;
+                this.questionTimeLimit = 30; // seconds
+                this.timeRemaining = 0;
+                this.audioPlayed = false;
+
+                this.audioElement = document.getElementById('audioPlayer');
+                this.setupAudioEvents();
+            }
+
+            setupAudioEvents() {
+                this.audioElement.addEventListener('loadedmetadata', () => {
+                    this.updateTimeDisplay();
+                });
+
+                this.audioElement.addEventListener('timeupdate', () => {
+                    this.updateProgress();
+                });
+
+                this.audioElement.addEventListener('ended', () => {
+                    this.onAudioEnded();
+                });
+            }
+
+            selectMode(mode) {
+                this.currentMode = mode;
+
+                // Update UI
+                document.querySelectorAll('.mode-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+                event.target.closest('.mode-card').classList.add('active');
+
+                // Load topics and show topic selector
+                this.loadTopics();
+                setTimeout(() => {
+                    document.getElementById('modeSelector').classList.add('hide');
+                    document.getElementById('topicSelector').classList.remove('hide');
+                }, 300);
+            }
+
+            async loadTopics() {
+                try {
+                    const response = await fetch('/api/listening/topics', {
+                        headers: {
+                            'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to load topics');
+                    }
+
+                    const data = await response.json();
+                    this.displayTopics(data.topics);
+
+                } catch (error) {
+                    console.error('Error loading topics:', error);
+                    document.getElementById('topicList').innerHTML = '<p class="text-danger">Error loading topics. Please try again.</p>';
+                }
+            }
+
+            displayTopics(topics) {
+                const topicList = document.getElementById('topicList');
+                let html = '';
+
+                // TOEFL Conversations (first 10)
+                if (topics.toefl_conversations && topics.toefl_conversations.length > 0) {
+                    html += '<h5><i class="bi bi-chat-dots"></i> TOEFL Conversations</h5>';
+                    html += '<div class="row" style="max-height: 400px; overflow-y: auto;">';
+                    topics.toefl_conversations.forEach(topic => {
+                        html += `
+                            <div class="col-md-4 mb-2">
+                                <div class="topic-card py-2" onclick="listeningPractice.selectTopic(${topic.id}, '${topic.title}')">
+                                    <h6 class="mb-1">${topic.title}</h6>
+                                    <small class="text-muted">${topic.description}</small>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+
+                // TOEFL Lectures (first 10)
+                if (topics.toefl_lectures && topics.toefl_lectures.length > 0) {
+                    html += '<h5 class="mt-3"><i class="bi bi-book"></i> TOEFL Lectures</h5>';
+                    html += '<div class="row" style="max-height: 400px; overflow-y: auto;">';
+                    topics.toefl_lectures.forEach(topic => {
+                        html += `
+                            <div class="col-md-4 mb-2">
+                                <div class="topic-card py-2" onclick="listeningPractice.selectTopic(${topic.id}, '${topic.title}')">
+                                    <h6 class="mb-1">${topic.title}</h6>
+                                    <small class="text-muted">${topic.description}</small>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+
+                topicList.innerHTML = html;
+            }
+
+            selectTopic(topicId, topicTitle) {
+                this.currentTopicId = topicId;
+                this.currentTopicTitle = topicTitle;
+                this.loadAudioContent();
+
+                // Update UI
+                document.querySelectorAll('.topic-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                event.target.closest('.topic-card').classList.add('selected');
+
+                // Show listening content
+                setTimeout(() => {
+                    document.getElementById('topicSelector').classList.add('hide');
+                    document.getElementById('listeningContent').classList.remove('hide');
+                }, 300);
+            }
+
+            async loadAudioContent() {
+                try {
+                    // Update mode indicator
+                    const modeIndicator = document.getElementById('modeIndicator');
+                    modeIndicator.textContent = this.currentMode === 'practice' ? 'Practice Mode' : 'Test Mode';
+                    modeIndicator.className = `badge fs-6 ${this.currentMode === 'practice' ? 'bg-success' : 'bg-warning'}`;
+
+                    // Show practice controls only in practice mode
+                    const practiceControls = document.getElementById('practiceControls');
+                    if (this.currentMode === 'practice') {
+                        practiceControls.classList.remove('hide');
+                    } else {
+                        practiceControls.classList.add('hide');
+                    }
+
+                    // Load audio from backend
+                    const response = await fetch(`/api/listening/content/${this.currentTopicId}`, {
+                        headers: {
+                            'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to load audio content');
+                    }
+
+                    const data = await response.json();
+                    this.currentAudio = data.content;
+
+                    // Update UI with audio info
+                    document.getElementById('audioTitle').textContent = this.currentTopicTitle;
+                    document.getElementById('audioDescription').textContent = this.currentAudio.category || 'TOEFL Listening Practice';
+
+                    // Load audio
+                    this.audioElement.src = this.currentAudio.audio_url;
+                    this.audioElement.load();
+
+                    // Show questions section
+                    document.getElementById('questionsSection').classList.remove('hide');
+
+                } catch (error) {
+                    console.error('Error loading audio content:', error);
+                    alert('Error loading audio content. Please try again.');
+                }
+            }
+
+            toggleAudio() {
+                const playBtn = document.getElementById('playBtn');
+                const icon = playBtn.querySelector('i');
+
+                if (this.audioElement.paused) {
+                    this.audioElement.play();
+                    icon.className = 'bi bi-pause-fill';
+                    this.audioPlayed = true;
+                } else {
+                    this.audioElement.pause();
+                    icon.className = 'bi bi-play-fill';
+                }
+            }
+
+            updateProgress() {
+                const progress = (this.audioElement.currentTime / this.audioElement.duration) * 100;
+                document.getElementById('progressFill').style.width = progress + '%';
+                this.updateTimeDisplay();
+            }
+
+            updateTimeDisplay() {
+                const current = this.formatTime(this.audioElement.currentTime);
+                const total = this.formatTime(this.audioElement.duration);
+
+                document.getElementById('currentTime').textContent = current;
+                document.getElementById('totalTime').textContent = total;
+            }
+
+            formatTime(seconds) {
+                if (isNaN(seconds)) return '0:00';
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            seekAudio(event) {
+                const progressBar = event.currentTarget;
+                const rect = progressBar.getBoundingClientRect();
+                const percent = (event.clientX - rect.left) / rect.width;
+                this.audioElement.currentTime = percent * this.audioElement.duration;
+            }
+
+            rewind() {
+                this.audioElement.currentTime = Math.max(0, this.audioElement.currentTime - 10);
+            }
+
+            fastForward() {
+                this.audioElement.currentTime = Math.min(this.audioElement.duration, this.audioElement.currentTime + 10);
+            }
+
+            playbackSpeed(speed) {
+                const rate = speed === 'slow' ? 0.8 : 1.0;
+                this.audioElement.playbackRate = rate;
+            }
+
+            onAudioEnded() {
+                const playBtn = document.getElementById('playBtn');
+                const icon = playBtn.querySelector('i');
+                icon.className = 'bi bi-play-fill';
+
+                if (this.currentMode === 'test') {
+                    // Auto-show questions in test mode
+                    this.showQuestions();
+                }
+            }
+
+            async showQuestions() {
+                try {
+                    if (this.currentMode === 'test' && !this.audioPlayed) {
+                        alert('Please listen to the audio first.');
+                        return;
+                    }
+
+                    // Load questions from backend
+                    const response = await fetch('/api/listening/questions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
+                        },
+                        body: JSON.stringify({
+                            transcript: this.currentAudio.transcript,
+                            topic_id: this.currentTopicId,
+                            mode: this.currentMode
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to load questions');
+                    }
+
+                    const data = await response.json();
+                    this.questions = data.questions;
+                    this.currentQuestionIndex = 0;
+                    this.answers = [];
+
+                    // Show questions section
+                    document.getElementById('questionsSection').classList.remove('hide');
+                    document.getElementById('showQuestionsBtn').classList.add('hide');
+
+                    // Disable audio controls in test mode
+                    if (this.currentMode === 'test') {
+                        document.getElementById('playBtn').disabled = true;
+                    }
+
+                    this.displayCurrentQuestion();
+
+                } catch (error) {
+                    console.error('Error loading questions:', error);
+                    alert('Error loading questions. Please try again.');
+                }
+            }
+
+            displayCurrentQuestion() {
+                const question = this.questions[this.currentQuestionIndex];
+                const questionContainer = document.getElementById('questionContainer');
+
+                // Show timer for test mode
+                if (this.currentMode === 'test') {
+                    this.startQuestionTimer();
+                }
+
+                // Handle both array and object formats for options
+                let optionsHtml = '';
+                if (Array.isArray(question.options)) {
+                    optionsHtml = question.options.map((option, index) => `
+                        <div class="answer-option" onclick="listeningPractice.selectAnswer('${String.fromCharCode(65 + index)}')">
+                            ${String.fromCharCode(65 + index)}. ${option}
+                        </div>
+                    `).join('');
+                } else if (typeof question.options === 'object') {
+                    optionsHtml = Object.entries(question.options).map(([key, value]) => `
+                        <div class="answer-option" onclick="listeningPractice.selectAnswer('${key}')">
+                            ${key}. ${value}
+                        </div>
+                    `).join('');
+                }
+
+                questionContainer.innerHTML = `
+                    <div class="question-card">
+                        <h5>Question ${this.currentQuestionIndex + 1} of ${this.questions.length}</h5>
+                        <p class="lead">${question.question}</p>
+                        <div class="answer-options">
+                            ${optionsHtml}
+                        </div>
+                    </div>
+                `;
+
+                // Update button visibility
+                const nextBtn = document.getElementById('nextQuestionBtn');
+                const submitBtn = document.getElementById('submitAnswersBtn');
+
+                if (this.currentQuestionIndex < this.questions.length - 1) {
+                    nextBtn.classList.remove('hide');
+                    submitBtn.classList.add('hide');
+                } else {
+                    nextBtn.classList.add('hide');
+                    submitBtn.classList.remove('hide');
+                }
+            }
+
+            selectAnswer(answer) {
+                // Remove previous selections
+                document.querySelectorAll('.answer-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+
+                // Select current option
+                event.target.classList.add('selected');
+
+                // Store answer (A, B, C, or D)
+                this.answers[this.currentQuestionIndex] = answer;
+
+                // Stop timer in test mode
+                if (this.currentMode === 'test') {
+                    this.stopQuestionTimer();
+                }
+            }
+
+            startQuestionTimer() {
+                const timerElement = document.getElementById('questionTimer');
+                timerElement.classList.remove('hide');
+                this.timeRemaining = this.questionTimeLimit;
+
+                this.questionTimer = setInterval(() => {
+                    this.timeRemaining--;
+                    timerElement.textContent = `${this.timeRemaining}s`;
+
+                    if (this.timeRemaining <= 10) {
+                        timerElement.classList.add('danger');
+                    }
+
+                    if (this.timeRemaining <= 0) {
+                        this.stopQuestionTimer();
+                        this.nextQuestion(); // Auto-advance when time runs out
+                    }
+                }, 1000);
+            }
+
+            stopQuestionTimer() {
+                if (this.questionTimer) {
+                    clearInterval(this.questionTimer);
+                    this.questionTimer = null;
+                    document.getElementById('questionTimer').classList.add('hide');
+                }
+            }
+
+            nextQuestion() {
+                this.stopQuestionTimer();
+                this.currentQuestionIndex++;
+
+                if (this.currentQuestionIndex < this.questions.length) {
+                    this.displayCurrentQuestion();
+                } else {
+                    this.submitAnswers();
+                }
+            }
+
+            async submitAnswers() {
+                try {
+                    this.stopQuestionTimer();
+
+                    const response = await fetch('/api/listening/submit', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
+                        },
+                        body: JSON.stringify({
+                            topic_id: this.currentTopicId,
+                            answers: this.answers,
+                            questions: this.questions,
+                            mode: this.currentMode
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to submit answers');
+                    }
+
+                    const data = await response.json();
+                    this.displayResults(data.results);
+
+                } catch (error) {
+                    console.error('Error submitting answers:', error);
+                    alert('Error submitting answers. Please try again.');
+                }
+            }
+
+            displayResults(results) {
+                // Update results section
+                document.getElementById('overallScore').textContent = `${Math.round(results.score)}%`;
+                document.getElementById('correctCount').textContent = `${results.correct_answers}/${results.total_questions}`;
+                document.getElementById('timeTaken').textContent = '--';
+                document.getElementById('comprehensionLevel').textContent = results.performance_level || 'Intermediate';
+
+                // Display recommendations
+                const feedbackText = results.recommendations ? results.recommendations.join(' ') : 'Good job! Keep practicing to improve your listening skills.';
+                document.getElementById('feedbackText').textContent = feedbackText;
+
+                // Show results
+                document.getElementById('listeningContent').classList.add('hide');
+                document.getElementById('resultsSection').classList.remove('hide');
+            }
+
+            tryAgain() {
+                // Reset state
+                this.currentQuestionIndex = 0;
+                this.answers = [];
+                this.audioPlayed = false;
+
+                // Show topic selector
+                document.getElementById('resultsSection').classList.add('hide');
+                document.getElementById('topicSelector').classList.remove('hide');
+            }
+
+            backToHome() {
+                window.location.href = '/';
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check authentication
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            window.listeningPractice = new ListeningPractice();
+        });
+    </script>
+</body>
+</html>

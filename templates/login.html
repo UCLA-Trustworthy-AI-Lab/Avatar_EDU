@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Language Arts Agent</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="text-center mt-5 mb-4">
+                    <h1 class="h3 mb-3">
+                        <i class="bi bi-book-half text-primary"></i>
+                        Language Arts Agent
+                    </h1>
+                    <p class="text-muted">Please sign in to continue</p>
+                </div>
+                
+                <div class="card shadow">
+                    <div class="card-body p-4">
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary" id="loginBtn">
+                                    <i class="bi bi-box-arrow-in-right"></i> Sign In
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Error message -->
+                        <div id="errorMessage" class="alert alert-danger mt-3" style="display: none;">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <span id="errorText">Invalid username or password</span>
+                        </div>
+                        
+                        <!-- Loading spinner -->
+                        <div id="loadingSpinner" class="text-center mt-3" style="display: none;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Signing in...</span>
+                            </div>
+                            <p class="text-muted mt-2">Signing you in...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Demo credentials -->
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="bi bi-info-circle text-info"></i> Demo Account
+                        </h6>
+                        <p class="card-text small text-muted mb-2">
+                            Use these credentials to test the reading module:
+                        </p>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <strong>Username:</strong><br>
+                                <code>demo_student</code>
+                            </div>
+                            <div class="col-6">
+                                <strong>Password:</strong><br>
+                                <code>password123</code>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline-secondary btn-sm mt-2 w-100" id="fillDemoBtn">
+                            <i class="bi bi-lightning"></i> Use Demo Credentials
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <a href="/" class="text-decoration-none">
+                        <i class="bi bi-arrow-left"></i> Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        class LoginManager {
+            constructor() {
+                this.bindEvents();
+                this.checkExistingToken();
+            }
+            
+            bindEvents() {
+                document.getElementById('loginForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleLogin();
+                });
+                
+                document.getElementById('fillDemoBtn').addEventListener('click', () => {
+                    document.getElementById('username').value = 'demo_student';
+                    document.getElementById('password').value = 'password123';
+                });
+            }
+            
+            checkExistingToken() {
+                const token = localStorage.getItem('auth_token');
+                if (token) {
+                    // Redirect to original page or homepage if already logged in
+                    const redirectUrl = this.getRedirectUrl();
+                    window.location.href = redirectUrl;
+                }
+            }
+
+            getRedirectUrl() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const redirect = urlParams.get('redirect');
+                return redirect || '/';
+            }
+            
+            async handleLogin() {
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value.trim();
+                
+                if (!username || !password) {
+                    this.showError('Please enter both username and password');
+                    return;
+                }
+                
+                this.showLoading(true);
+                this.hideError();
+                
+                try {
+                    const response = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            username: username,
+                            password: password
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.access_token) {
+                        // Store token and user info
+                        localStorage.setItem('auth_token', data.access_token);
+                        localStorage.setItem('user_id', data.user_id);
+                        localStorage.setItem('username', data.username);
+                        localStorage.setItem('user_type', data.user_type);
+                        
+                        // Show success message briefly then redirect
+                        this.showSuccess('Login successful! Redirecting...');
+
+                        setTimeout(() => {
+                            const redirectUrl = this.getRedirectUrl();
+                            window.location.href = redirectUrl;
+                        }, 1000);
+                        
+                    } else {
+                        this.showError(data.error || 'Login failed. Please try again.');
+                    }
+                    
+                } catch (error) {
+                    console.error('Login error:', error);
+                    this.showError('Network error. Please check your connection and try again.');
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+            
+            showLoading(show) {
+                const spinner = document.getElementById('loadingSpinner');
+                const button = document.getElementById('loginBtn');
+                
+                if (show) {
+                    spinner.style.display = 'block';
+                    button.disabled = true;
+                    button.innerHTML = '<i class="bi bi-hourglass-split"></i> Signing In...';
+                } else {
+                    spinner.style.display = 'none';
+                    button.disabled = false;
+                    button.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> Sign In';
+                }
+            }
+            
+            showError(message) {
+                const errorDiv = document.getElementById('errorMessage');
+                const errorText = document.getElementById('errorText');
+                
+                errorText.textContent = message;
+                errorDiv.style.display = 'block';
+            }
+            
+            hideError() {
+                document.getElementById('errorMessage').style.display = 'none';
+            }
+            
+            showSuccess(message) {
+                const errorDiv = document.getElementById('errorMessage');
+                const errorText = document.getElementById('errorText');
+                
+                errorDiv.className = 'alert alert-success mt-3';
+                errorText.innerHTML = '<i class="bi bi-check-circle"></i> ' + message;
+                errorDiv.style.display = 'block';
+            }
+        }
+        
+        // Initialize login manager when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new LoginManager();
+        });
+    </script>
+</body>
+</html>
