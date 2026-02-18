@@ -69,8 +69,13 @@ class ReadingChatbotService:
             # Get AI response
             ai_response = self.openai_client.generate_content(prompt)
 
-            # Extract content from response
-            response_text = ai_response.get('content', ai_response) if isinstance(ai_response, dict) else str(ai_response)
+            # Check if OpenAI is unavailable
+            if isinstance(ai_response, dict) and 'error' in ai_response:
+                logger.warning(f"OpenAI unavailable for chatbot: {ai_response['error']}")
+                response_text = self._generate_fallback_response(user_message, message_type, context)
+            else:
+                # Extract content from response
+                response_text = ai_response.get('content', ai_response) if isinstance(ai_response, dict) else str(ai_response)
 
             # Store conversation history (old method)
             self._store_conversation(reading_session_id, user_message, response_text)
@@ -161,8 +166,18 @@ class ReadingChatbotService:
             """
             
             ai_response = self.openai_client.generate_content(prompt)
-            response_text = ai_response.get('content', ai_response) if isinstance(ai_response, dict) else str(ai_response)
-            
+
+            if isinstance(ai_response, dict) and 'error' in ai_response:
+                response_text = (
+                    f"**{word}** - I can see you're curious about this word! "
+                    f"While my AI connection is currently unavailable, here's a tip: "
+                    f"Try to understand the word from the surrounding sentence context. "
+                    f"You can also click on the word in the text to see its dictionary definition. "
+                    f"(AI features will be available once the OpenAI API key is configured.)"
+                )
+            else:
+                response_text = ai_response.get('content', ai_response) if isinstance(ai_response, dict) else str(ai_response)
+
             return {
                 'response': response_text,
                 'type': 'word_explanation',
@@ -226,8 +241,20 @@ class ReadingChatbotService:
             """
             
             ai_response = self.openai_client.generate_content(prompt)
-            response_text = ai_response.get('content', ai_response) if isinstance(ai_response, dict) else str(ai_response)
-            
+
+            if isinstance(ai_response, dict) and 'error' in ai_response:
+                response_text = (
+                    f"Great question about \"{session.text_title}\"! "
+                    f"While the AI assistant is currently offline, here are some reading strategies:\n\n"
+                    f"1. **Re-read the passage** carefully, focusing on the key sentences\n"
+                    f"2. **Look for context clues** in the surrounding paragraphs\n"
+                    f"3. **Identify the main idea** of each paragraph first\n"
+                    f"4. **Pay attention to transition words** like 'however', 'therefore', 'in addition'\n\n"
+                    f"(AI-powered answers will be available once the OpenAI API key is configured.)"
+                )
+            else:
+                response_text = ai_response.get('content', ai_response) if isinstance(ai_response, dict) else str(ai_response)
+
             return {
                 'response': response_text,
                 'type': 'comprehension_help',
@@ -291,8 +318,26 @@ class ReadingChatbotService:
             """
             
             ai_response = self.openai_client.generate_content(prompt)
-            response_text = ai_response.get('content', ai_response) if isinstance(ai_response, dict) else str(ai_response)
-            
+
+            if isinstance(ai_response, dict) and 'error' in ai_response:
+                speed_tip = ""
+                if reading_speed > 0 and reading_speed < 150:
+                    speed_tip = "Your reading speed is below average. Try reading easier materials first to build speed."
+                elif reading_speed >= 150:
+                    speed_tip = f"Your reading speed of {reading_speed} WPM is good! Keep challenging yourself."
+
+                response_text = (
+                    f"**Reading Strategy Tips for \"{session.text_title}\":**\n\n"
+                    f"1. **Skim first, read second** - Quickly scan headings and first sentences before deep reading\n"
+                    f"2. **Don't look up every word** - Try to guess meaning from context first\n"
+                    f"3. **Take mental notes** - After each paragraph, summarize the main point in your head\n"
+                    f"4. **Practice daily** - Even 15 minutes of English reading builds skill over time\n"
+                    f"{speed_tip}\n\n"
+                    f"(Personalized AI tips will be available once the OpenAI API key is configured.)"
+                )
+            else:
+                response_text = ai_response.get('content', ai_response) if isinstance(ai_response, dict) else str(ai_response)
+
             return {
                 'response': response_text,
                 'type': 'strategy_tips',
@@ -444,6 +489,54 @@ class ReadingChatbotService:
         Respond as a helpful English teacher who REMEMBERS this student's learning journey!
         """
     
+    def _generate_fallback_response(self, user_message: str, message_type: str, context: Dict) -> str:
+        """Generate a helpful fallback response when OpenAI is unavailable"""
+        msg_lower = user_message.lower()
+        text_title = context.get('text_title', 'the passage')
+
+        # Vocabulary question
+        if message_type == 'word_explanation' or any(w in msg_lower for w in ['word', 'mean', 'definition', 'vocab']):
+            return (
+                f"Great vocabulary question! While the AI is currently offline, here are some tips:\n\n"
+                f"1. **Click on any word** in the text to see its dictionary definition\n"
+                f"2. **Look at the context** - the surrounding sentences often explain the word\n"
+                f"3. **Break down the word** - look for prefixes (un-, re-, pre-) and suffixes (-tion, -ly, -ment)\n\n"
+                f"(AI-powered explanations will be available once the OpenAI API is configured.)"
+            )
+
+        # Grammar question
+        if any(w in msg_lower for w in ['grammar', 'tense', 'verb', 'noun', 'sentence', 'clause']):
+            return (
+                f"That's a great grammar question! Here's a quick tip:\n\n"
+                f"1. **Identify the subject and verb** of the sentence first\n"
+                f"2. **Check the tense** - is it past, present, or future?\n"
+                f"3. **Look for connectors** like 'which', 'that', 'who' for complex sentences\n\n"
+                f"(Detailed AI grammar analysis will be available once the OpenAI API is configured.)"
+            )
+
+        # Comprehension / explain text
+        if any(w in msg_lower for w in ['explain', 'understand', 'what does', 'passage', 'text', 'paragraph']):
+            return (
+                f"I'd love to help you understand \"{text_title}\"! While the AI is offline, try these strategies:\n\n"
+                f"1. **Read the first and last sentences** of each paragraph for main ideas\n"
+                f"2. **Look for signal words** like 'however', 'therefore', 'for example'\n"
+                f"3. **Summarize each paragraph** in one sentence in your own words\n"
+                f"4. **Click unfamiliar words** to see their definitions\n\n"
+                f"(AI-powered text analysis will be available once the OpenAI API is configured.)"
+            )
+
+        # Default response
+        return (
+            f"Thank you for your question! I'm your English learning assistant.\n\n"
+            f"While the AI service is currently offline, I can still help through the reading tools:\n\n"
+            f"- **Click any word** in the text to see its definition and pronunciation\n"
+            f"- **Use Lock Mode** to practice reading without assistance, then test comprehension\n"
+            f"- **Use AI Mode** to get vocabulary help as you read\n\n"
+            f"**Quick English Tip:** When reading \"{text_title}\", try to identify the author's main argument "
+            f"and the evidence used to support it.\n\n"
+            f"(Full AI chat features will be available once the OpenAI API key is configured.)"
+        )
+
     def _store_conversation(self, reading_session_id: int, user_message: str, ai_response: str):
         """Store conversation history for context"""
         if reading_session_id not in self.conversation_history:

@@ -7,14 +7,19 @@ logger = logging.getLogger(__name__)
 
 class WordsAPIClient:
     """Client for interacting with WordsAPI for vocabulary definitions and data"""
-    
+
     def __init__(self):
         self.base_url = "https://wordsapiv1.p.rapidapi.com/words"
+        self.api_key = current_app.config.get('WORDSAPI_KEY')
         self.headers = {
-            "X-RapidAPI-Key": current_app.config.get('WORDSAPI_KEY'),
+            "X-RapidAPI-Key": self.api_key,
             "X-RapidAPI-Host": "wordsapiv1.p.rapidapi.com"
         }
-    
+
+    def _is_configured(self) -> bool:
+        """Check if WordsAPI key is configured"""
+        return bool(self.api_key)
+
     def get_word_details(self, word: str) -> Optional[Dict]:
         """
         Get comprehensive word details including definitions, pronunciation, examples
@@ -26,9 +31,13 @@ class WordsAPIClient:
             Dictionary containing word details or None if not found
         """
         try:
+            if not self._is_configured():
+                logger.info(f"WordsAPI key not configured, skipping API call for '{word}'")
+                return None
+
             url = f"{self.base_url}/{word.lower()}"
             response = requests.get(url, headers=self.headers, timeout=10)
-            
+
             if response.status_code == 200:
                 data = response.json()
                 

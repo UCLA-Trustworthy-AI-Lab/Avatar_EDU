@@ -72,6 +72,17 @@ class WritingService:
         """
         
         prompt_data = self.openai_client.generate_content(prompt_request)
+
+        # Fallback if OpenAI is unavailable
+        if isinstance(prompt_data, dict) and 'error' in prompt_data:
+            return {
+                'title': f'{topic_type.title()} Writing Practice',
+                'prompt': f'Write a {difficulty_level} level {topic_type} piece. Express your ideas clearly and use varied vocabulary.',
+                'word_target': 200,
+                'writing_tips': ['Plan before writing', 'Use varied sentence structures', 'Proofread your work'],
+                'evaluation_criteria': ['Content', 'Organization', 'Grammar', 'Vocabulary']
+            }
+
         return prompt_data
     
     def process_handwritten_submission(self, image_file_path: str) -> Dict:
@@ -110,11 +121,13 @@ class WritingService:
             '1': 'l',  # Context-dependent
         }
         
-        # Apply basic cleaning (more sophisticated logic could be added)
-        for old, new in replacements.items():
-            # Only replace in specific contexts to avoid over-correction
-            pass
-        
+        # Apply context-aware cleaning for common OCR misreads
+        import re
+        # Replace pipe with I when surrounded by letters (likely OCR misread)
+        cleaned = re.sub(r'(?<=[a-zA-Z])\|(?=[a-zA-Z])', 'I', cleaned)
+        # Replace standalone pipe at start of word
+        cleaned = re.sub(r'\|(?=[a-z])', 'I', cleaned)
+
         return cleaned
     
     def evaluate_writing_submission(self, session_id: int, text: str, prompt_data: Dict) -> Dict:
@@ -124,7 +137,7 @@ class WritingService:
         
         # Comprehensive writing evaluation using AI
         evaluation_prompt = f"""
-        Evaluate this student's writing (age 8-14) based on the prompt and criteria:
+        Evaluate this student's writing (age 16-20) based on the prompt and criteria:
         
         PROMPT: {prompt_data.get('prompt', '')}
         STUDENT WRITING: {text}
@@ -140,13 +153,26 @@ class WritingService:
         - Overall score (0-100)
         - Specific positive feedback
         - 2-3 areas for improvement
-        - Encouragement appropriate for child's age
+        - Encouragement appropriate for a student aged 16-20
         
         Return as structured JSON.
         """
         
         evaluation = self.openai_client.generate_content(evaluation_prompt)
-        
+
+        # Fallback if OpenAI is unavailable
+        if isinstance(evaluation, dict) and 'error' in evaluation:
+            evaluation = {
+                'overall_score': 70,
+                'content_ideas': 18,
+                'organization': 18,
+                'grammar_mechanics': 17,
+                'vocabulary': 17,
+                'positive_feedback': 'You completed the writing task!',
+                'areas_for_improvement': ['Practice varied sentence structures', 'Expand vocabulary usage'],
+                'encouragement': 'Keep writing to improve! For detailed AI feedback, configure your OpenAI API key.'
+            }
+
         # Add additional metrics
         word_count = len(text.split())
         sentence_count = len([s for s in text.split('.') if s.strip()])

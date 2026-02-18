@@ -641,8 +641,12 @@ def generate_comprehension_questions(session_id):
         """
         
         response = openai_client.generate_content(questions_prompt, temperature=0.7)
-        
-        if isinstance(response, dict) and 'content' in response:
+
+        # Check if OpenAI is unavailable (no API key or error)
+        if isinstance(response, dict) and 'error' in response:
+            logger.warning(f"OpenAI unavailable: {response['error']}. Using fallback questions.")
+            questions = _generate_fallback_questions(text_content, num_questions)
+        elif isinstance(response, dict) and 'content' in response:
             import json
             try:
                 questions = json.loads(response['content'])
@@ -654,9 +658,13 @@ def generate_comprehension_questions(session_id):
                 if start != -1 and end != 0:
                     questions = json.loads(content[start:end])
                 else:
-                    raise ValueError("Could not parse questions from AI response")
+                    logger.warning("Could not parse AI response. Using fallback questions.")
+                    questions = _generate_fallback_questions(text_content, num_questions)
+        elif isinstance(response, list):
+            questions = response
         else:
-            raise ValueError("Invalid response from AI")
+            logger.warning("Unexpected AI response format. Using fallback questions.")
+            questions = _generate_fallback_questions(text_content, num_questions)
             
         # Validate questions format
         if not isinstance(questions, list) or len(questions) == 0:
@@ -740,6 +748,84 @@ def submit_comprehension_answers(session_id):
             'error': 'Failed to evaluate answers',
             'message': str(e)
         }), 500
+
+def _generate_fallback_questions(text_content, num_questions=5):
+    """Generate basic comprehension questions when OpenAI is unavailable"""
+    import re
+
+    sentences = [s.strip() for s in re.split(r'[.!?]+', text_content) if len(s.strip()) > 20]
+    words = text_content.split()
+    total_words = len(words)
+
+    # Extract some key terms (longer words likely to be meaningful)
+    key_words = sorted(set(w.strip('.,;:!?()[]"\'').lower() for w in words if len(w) > 6), key=lambda w: -len(w))[:10]
+
+    questions = []
+
+    # Question 1: Main idea
+    questions.append({
+        "question": "What is the main topic of this passage?",
+        "options": [
+            "The passage discusses " + (key_words[0] if key_words else "a specific topic") + " and related concepts",
+            "The passage is primarily about cooking techniques",
+            "The passage focuses on ancient history",
+            "The passage is a fictional short story"
+        ],
+        "correct_answer": "The passage discusses " + (key_words[0] if key_words else "a specific topic") + " and related concepts"
+    })
+
+    # Question 2: Detail
+    if len(sentences) > 1:
+        questions.append({
+            "question": "Based on the passage, which of the following details is mentioned?",
+            "options": [
+                sentences[0][:80] + "..." if len(sentences[0]) > 80 else sentences[0],
+                "The author traveled to Antarctica for research",
+                "The events took place in the 15th century",
+                "The study involved only two participants"
+            ],
+            "correct_answer": sentences[0][:80] + "..." if len(sentences[0]) > 80 else sentences[0]
+        })
+
+    # Question 3: Vocabulary
+    if len(key_words) >= 2:
+        questions.append({
+            "question": f"The word '{key_words[1]}' as used in the passage most likely relates to:",
+            "options": [
+                f"The main subject being discussed",
+                "A type of musical instrument",
+                "A geographical location",
+                "A mathematical formula"
+            ],
+            "correct_answer": "The main subject being discussed"
+        })
+
+    # Question 4: Inference
+    questions.append({
+        "question": "What can be inferred about the author's purpose in writing this passage?",
+        "options": [
+            "To inform and educate the reader about the topic",
+            "To persuade the reader to buy a product",
+            "To entertain with a humorous anecdote",
+            "To criticize a political figure"
+        ],
+        "correct_answer": "To inform and educate the reader about the topic"
+    })
+
+    # Question 5: Structure
+    questions.append({
+        "question": "How is the information in this passage primarily organized?",
+        "options": [
+            "By presenting ideas and supporting details",
+            "By listing items in alphabetical order",
+            "By comparing two opposing fictional characters",
+            "By describing events in reverse chronological order"
+        ],
+        "correct_answer": "By presenting ideas and supporting details"
+    })
+
+    return questions[:num_questions]
+
 
 # ============================================================================
 # MEMORY BOARD ENDPOINTS - View student's learning patterns and adaptations

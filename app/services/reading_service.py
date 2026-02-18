@@ -46,7 +46,7 @@ class ReadingService:
         
         # Generate new content using AI
         prompt = f"""
-        Create a reading passage for children aged 8-14 at {difficulty_level} level.
+        Create a reading passage for students aged 16-20 at {difficulty_level} level.
         Topic: {topic or 'educational and engaging story'}
         
         Requirements:
@@ -60,6 +60,15 @@ class ReadingService:
         """
         
         content = self.openai_client.generate_content(prompt)
+
+        # Fallback if OpenAI is unavailable
+        if isinstance(content, dict) and 'error' in content:
+            return {
+                'title': f'Reading Practice: {topic or "General"}',
+                'passage': f'This is a placeholder reading passage about {topic or "an educational topic"}. Please configure your OpenAI API key in .env for AI-generated content.',
+                'learning_objectives': ['Reading comprehension', 'Vocabulary building', 'Critical thinking']
+            }
+
         return content
     
     def track_reading_performance(self, session_id: int, reading_data: Dict) -> Dict:
@@ -99,7 +108,7 @@ class ReadingService:
         return performance_data
     
     def calculate_reading_fluency(self, wpm: float, pauses: int, word_count: int) -> float:
-        # Age-appropriate WPM ranges for children 8-14
+        # Age-appropriate WPM ranges for students 16-20
         if wpm >= 150:  # Advanced
             base_score = 95
         elif wpm >= 120:  # Good
@@ -137,8 +146,21 @@ class ReadingService:
         """
         
         questions = self.openai_client.generate_content(prompt)
+
+        # Fallback if OpenAI is unavailable
+        if isinstance(questions, dict) and 'error' in questions:
+            return [
+                {
+                    'question': 'What is the main idea of this passage?',
+                    'type': 'multiple_choice',
+                    'options': ['Option A', 'Option B', 'Option C', 'Option D'],
+                    'correct_answer': 'Option A',
+                    'difficulty': 'medium'
+                }
+            ]
+
         return questions
-    
+
     def evaluate_comprehension_answers(self, session_id: int, answers: List[str]) -> Dict:
         session = LearningSession.query.get(session_id)
         if not session:
@@ -214,7 +236,7 @@ class ReadingService:
         Rate the answer from 0.0 to 1.0 based on:
         - Accuracy and completeness
         - Understanding demonstrated
-        - Age-appropriate expectations (8-14 years old)
+        - Age-appropriate expectations (16-20 years old)
         
         Return only the numeric score.
         """
@@ -409,11 +431,11 @@ class ReadingService:
             # Return basic fallback word data instead of error
             return {
                 'word': word,
-                'definition': f'A word meaning: {word}',
-                'pronunciation': f'/{word.lower()}/',
-                'examples': [f'This is an example sentence using the word {word}.'],
-                'synonyms': ['related_word'],
-                'chinese_translation': f'{word}的中文翻译' if include_chinese else None,
+                'definition': 'Definition not available. Please configure API keys in .env.',
+                'pronunciation': '',
+                'examples': [],
+                'synonyms': [],
+                'chinese_translation': f'[{word}的中文翻译]' if include_chinese else None,
                 'difficulty_level': 5,
                 'looked_up_count': 1,
                 'is_mastered': False,
@@ -712,10 +734,14 @@ class ReadingService:
             """
             
             questions_data = self.openai_client.generate_content(prompt)
-            
+
+            # Fallback if OpenAI is unavailable
+            if isinstance(questions_data, dict) and 'error' in questions_data:
+                return []
+
             if isinstance(questions_data, str):
                 questions_data = json.loads(questions_data)
-            
+
             return questions_data.get('questions', []) if isinstance(questions_data, dict) else questions_data
             
         except Exception as e:

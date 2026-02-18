@@ -31,9 +31,8 @@ def convert_webm_to_wav(input_path: str, output_path: Optional[str] = None) -> s
         # Try using ffmpeg if available (check multiple locations)
         ffmpeg_paths = [
             'ffmpeg',  # In PATH
-            '/usr/local/bin/ffmpeg',  # Homebrew location
-            '/opt/homebrew/bin/ffmpeg',  # Apple Silicon Homebrew
-            '/Users/chunhewang/Desktop/ffmpeg'  # User's desktop location
+            '/usr/local/bin/ffmpeg',  # Homebrew location (Intel Mac)
+            '/opt/homebrew/bin/ffmpeg',  # Homebrew location (Apple Silicon)
         ]
 
         ffmpeg_cmd = None
@@ -93,12 +92,10 @@ def convert_with_pydub(input_path: str, output_path: str) -> str:
         from pydub.utils import which
 
         # Try to set custom paths for ffmpeg tools if available
-        ffmpeg_custom_path = '/Users/chunhewang/Desktop/ffmpeg'
-        if os.path.exists(ffmpeg_custom_path):
-            AudioSegment.converter = ffmpeg_custom_path
-            # For ffprobe, since it's not available, we'll let pydub handle it
-            # pydub can work with just ffmpeg for basic conversions
-            current_app.logger.info(f"Using custom ffmpeg path: {ffmpeg_custom_path}")
+        # Use ffmpeg from PATH or standard Homebrew locations
+        ffmpeg_path = which("ffmpeg")
+        if ffmpeg_path:
+            AudioSegment.converter = ffmpeg_path
 
         # Load the WebM audio file
         audio = AudioSegment.from_file(input_path, format="webm")

@@ -13,6 +13,9 @@ from app.models.speaking import (
     StudentSpeakingChallenge
 )
 from app.models.progress import Progress, ModuleProgress
+import logging
+
+logger = logging.getLogger(__name__)
 from app import db
 
 class EnhancedSpeakingService:
@@ -90,10 +93,17 @@ class EnhancedSpeakingService:
 
         # Handle different response formats
         try:
-            if isinstance(response, str):
+            # Check if OpenAI returned an error (no API key, etc.)
+            if isinstance(response, dict) and 'error' in response:
+                words = []
+            elif isinstance(response, dict) and 'content' in response:
+                words = json.loads(response['content'])
+            elif isinstance(response, str):
                 words = json.loads(response)
-            else:
+            elif isinstance(response, list):
                 words = response
+            else:
+                words = []
 
             # Ensure words is a list
             if not isinstance(words, list):
@@ -159,7 +169,7 @@ class EnhancedSpeakingService:
                 return self._generate_word_practice_content(difficulty_level, category, min(count, 5))
 
         except Exception as e:
-            current_app.logger.error(f"Error getting database word content: {str(e)}")
+            logger.error(f"Error getting database word content: {str(e)}")
             # Fallback: generate new content
             return self._generate_word_practice_content(difficulty_level, category, min(count, 5))
 
@@ -365,10 +375,17 @@ class EnhancedSpeakingService:
 
         # Handle different response formats and ensure we have valid content
         try:
-            if isinstance(response, str):
+            # Check if OpenAI returned an error (no API key, etc.)
+            if isinstance(response, dict) and 'error' in response:
+                sentences = []
+            elif isinstance(response, dict) and 'content' in response:
+                sentences = json.loads(response['content'])
+            elif isinstance(response, str):
                 sentences = json.loads(response)
-            else:
+            elif isinstance(response, list):
                 sentences = response
+            else:
+                sentences = []
 
             # Ensure sentences is a list
             if not isinstance(sentences, list):
@@ -592,10 +609,17 @@ class EnhancedSpeakingService:
 
         # Handle different response formats and ensure we have valid content
         try:
-            if isinstance(response, str):
+            # Check if OpenAI returned an error (no API key, etc.)
+            if isinstance(response, dict) and 'error' in response:
+                paragraph_data = {}
+            elif isinstance(response, dict) and 'content' in response:
+                paragraph_data = json.loads(response['content'])
+            elif isinstance(response, str):
                 paragraph_data = json.loads(response)
-            else:
+            elif isinstance(response, dict):
                 paragraph_data = response
+            else:
+                paragraph_data = {}
 
             # Ensure paragraph_data is a dictionary
             if not isinstance(paragraph_data, dict):
@@ -740,7 +764,21 @@ class EnhancedSpeakingService:
         Return as JSON with scores and brief comments."""
 
         analysis = self.openai_client.generate_content(prompt)
-        return json.loads(analysis) if isinstance(analysis, str) else analysis
+
+        # Handle error or missing API key
+        if isinstance(analysis, dict) and 'error' in analysis:
+            return {
+                'content_completeness': 70,
+                'logical_flow': 70,
+                'vocabulary_usage': 70,
+                'grammar_accuracy': 70,
+                'comments': 'Detailed content analysis unavailable. Please configure OpenAI API key for full feedback.'
+            }
+
+        try:
+            return json.loads(analysis) if isinstance(analysis, str) else analysis
+        except (json.JSONDecodeError, TypeError):
+            return {'content_completeness': 70, 'logical_flow': 70, 'vocabulary_usage': 70, 'grammar_accuracy': 70}
 
     def _analyze_pauses_and_fillers(self, audio_file_path: str, target_text: str) -> Dict:
         """Analyze pauses and filler words in speech"""
@@ -1210,14 +1248,19 @@ class EnhancedSpeakingService:
         """
 
         try:
-            response = self.openai_client.create_completion(
+            response = self.openai_client.generate_content(
                 prompt=prompt,
                 max_tokens=150,
                 temperature=0.3
             )
 
+            # Fallback if OpenAI is unavailable
+            if isinstance(response, dict) and 'error' in response:
+                return {'fluency': 5.5, 'lexical': 5.5, 'grammar': 5.5, 'pronunciation': 5.5}
+
             # Parse JSON response
-            scores_text = response.strip()
+            scores_text = response if isinstance(response, str) else json.dumps(response)
+            scores_text = scores_text.strip()
             if scores_text.startswith('```json'):
                 scores_text = scores_text.split('```json')[1].split('```')[0]
             elif scores_text.startswith('```'):

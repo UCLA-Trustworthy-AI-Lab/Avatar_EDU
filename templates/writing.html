@@ -692,7 +692,6 @@
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Writing module initialized');
             setupEventListeners();
             updateStats();
         });
@@ -731,7 +730,6 @@
 
         // Select a writing topic
         function selectTopic(topic) {
-            console.log('Selected topic:', topic);
             currentTopic = topic;
 
             // Update UI to show selected topic
@@ -803,13 +801,11 @@
                 const token = localStorage.getItem('auth_token');
 
                 if (!token) {
-                    console.log('No auth token found, user needs to login');
                     // Provide basic analysis without login
                     performBasicAnalysis(text);
                     return;
                 }
 
-                console.log('Sending request to GPT analysis API...');
 
                 // Call API for GPT analysis
                 const response = await fetch('/api/writing/analyze', {
@@ -825,26 +821,21 @@
                     })
                 });
 
-                console.log('Response status:', response.status);
-
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.error('API Error:', errorText);
 
                     // Fallback to basic analysis
-                    console.log('API failed, using basic analysis');
                     performBasicAnalysis(text);
                     return;
                 }
 
                 const data = await response.json();
-                console.log('Received analysis data:', data);
 
                 if (data.success && data.analysis) {
                     currentAnalysis = data.analysis;
                     displayComprehensiveAnalysis(data.analysis);
                 } else {
-                    console.log('Invalid response format, using basic analysis');
                     performBasicAnalysis(text);
                 }
 
@@ -929,22 +920,16 @@
 
         // Display comprehensive GPT analysis
         function displayComprehensiveAnalysis(analysis) {
-            console.log('Displaying analysis:', analysis);
-            console.log('Analysis type:', typeof analysis);
-            console.log('Analysis keys:', Object.keys(analysis));
-
             // Check if analysis has the expected structure
             if (!analysis || typeof analysis !== 'object') {
                 console.error('Invalid analysis object:', analysis);
                 // Use fallback analysis instead of showing error
-                console.log('Using fallback analysis due to invalid data');
                 performBasicAnalysis(document.getElementById('writingEditor').value.trim());
                 return;
             }
 
             // If GPT didn't return the expected structure, create a fallback
             if (!analysis.overall_analysis && !analysis.grammar_analysis && !analysis.style_analysis) {
-                console.log('GPT returned unexpected structure, creating fallback...');
 
                 // If analysis is just a string or has content key, extract it
                 let content = '';
@@ -994,12 +979,10 @@
                     }
                 };
 
-                console.log('Created fallback analysis structure');
             }
 
             // Overall Tab
             if (analysis.overall_analysis) {
-                console.log('Processing overall_analysis...');
                 const overall = analysis.overall_analysis;
 
                 // Scores - with null checks

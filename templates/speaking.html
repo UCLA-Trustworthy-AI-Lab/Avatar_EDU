@@ -757,7 +757,6 @@
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Speaking practice module initialized');
             setupEventListeners();
             checkMicrophonePermission();
         });
@@ -775,7 +774,6 @@
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 stream.getTracks().forEach(track => track.stop());
-                console.log('Microphone permission granted');
             } catch (error) {
                 console.error('Microphone permission denied:', error);
                 showStatus('error', 'Microphone access is required for speaking practice. Please grant permission and refresh the page.');
@@ -783,7 +781,6 @@
         }
 
         function selectPracticeType(type) {
-            console.log('Selected practice type:', type);
             currentType = type;
             currentIndex = 0;
 
@@ -911,7 +908,6 @@
                 };
 
                 mediaRecorder.start();
-                console.log('Recording started for', type);
 
             } catch (error) {
                 console.error('Error starting recording:', error);
@@ -986,7 +982,6 @@
         async function processRecording(type) {
             try {
                 const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                console.log('Audio blob created, size:', audioBlob.size);
 
                 // Store the recording for replay functionality
                 lastRecordingBlob = audioBlob;
@@ -1024,7 +1019,6 @@
 
                 if (response.ok) {
                     const results = await response.json();
-                    console.log('Assessment results:', results);
                     displayResults(results, type);
                 } else {
                     console.error('Assessment failed:', response.status);
@@ -1374,7 +1368,6 @@
                 };
 
                 mediaRecorder.start();
-                console.log('IELTS recording started');
 
             } catch (error) {
                 console.error('Error starting IELTS recording:', error);
@@ -1397,7 +1390,6 @@
         async function processIELTSRecording() {
             try {
                 const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                console.log('IELTS audio blob created, size:', audioBlob.size);
 
                 // For IELTS, we assess the overall speaking performance
                 const topicTitle = document.getElementById('ieltsTopicTitle').textContent;
@@ -1425,7 +1417,6 @@
 
                 if (response.ok) {
                     const results = await response.json();
-                    console.log('IELTS assessment results:', results);
                     displayResults(results, 'ielts');
                 } else {
                     console.error('IELTS assessment failed:', response.status);
@@ -1530,7 +1521,6 @@
 
                 // Play the audio
                 audio.play().then(() => {
-                    console.log('Replaying recorded audio');
                 }).catch(error => {
                     console.error('Error playing audio:', error);
                     showStatus('error', 'Could not play the recording.');

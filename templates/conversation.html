@@ -576,7 +576,6 @@
                         if (audioInputs.length === 0) {
                             console.warn('No audio input devices found');
                         } else {
-                            console.log(`Found ${audioInputs.length} audio input device(s)`);
                         }
                     } catch (e) {
                         console.warn('Could not enumerate devices:', e);
@@ -876,7 +875,7 @@
                 }
 
                 try {
-                    const token = localStorage.getItem('token');
+                    const token = localStorage.getItem('auth_token');
                     const response = await fetch('/api/conversation/reset', {
                         method: 'POST',
                         headers: {
@@ -1163,7 +1162,6 @@
                             </svg>
                         `);
                         
-                        console.log('Avatar video initialized with session:', sessionData.sessionId);
                     }
                 } catch (error) {
                     console.error('Error initializing avatar video:', error);
@@ -1252,7 +1250,6 @@
             
             initializeHeyGenStreaming() {
                 // Placeholder for HeyGen streaming API integration
-                console.log('Initializing HeyGen streaming...');
                 // This would integrate with HeyGen's streaming API
             }
             

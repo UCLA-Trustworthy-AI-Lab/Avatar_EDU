@@ -24,7 +24,7 @@ class SpeakingService:
     
     def generate_pronunciation_exercise(self, difficulty_level: str = 'intermediate') -> Dict:
         prompt = f"""
-        Create a pronunciation exercise for children aged 8-14 at {difficulty_level} level.
+        Create a pronunciation exercise for students aged 16-20 at {difficulty_level} level.
         Include:
         - 10 words/phrases to practice
         - Phonetic guides
@@ -35,6 +35,18 @@ class SpeakingService:
         """
         
         exercise = self.openai_client.generate_content(prompt)
+
+        # Fallback if OpenAI is unavailable
+        if isinstance(exercise, dict) and 'error' in exercise:
+            return {
+                'words': ['hello', 'world', 'language', 'practice', 'speaking',
+                          'learning', 'reading', 'writing', 'listening', 'vocabulary'],
+                'phonetics': ['/həˈloʊ/', '/wɜːrld/', '/ˈlæŋɡwɪdʒ/', '/ˈpræktɪs/', '/ˈspiːkɪŋ/',
+                              '/ˈlɜːrnɪŋ/', '/ˈriːdɪŋ/', '/ˈraɪtɪŋ/', '/ˈlɪsənɪŋ/', '/voʊˈkæbjəˌlɛri/'],
+                'tips': ['Focus on clear pronunciation', 'Practice at a comfortable pace'],
+                'message': 'Configure your OpenAI API key in .env for personalized exercises.'
+            }
+
         return exercise
     
     def analyze_pronunciation(self, audio_file_path: str, target_text: str) -> Dict:
@@ -102,11 +114,19 @@ class SpeakingService:
         
         Transcription: {transcription}
         
-        Provide constructive feedback for a child aged 8-14.
+        Provide constructive feedback for a student aged 16-20.
         """
         
         analysis = self.openai_client.generate_content(analysis_prompt)
-        
+
+        # Fallback if OpenAI is unavailable
+        if isinstance(analysis, dict) and 'error' in analysis:
+            analysis = {
+                'grammar': 'Analysis not available without OpenAI API key.',
+                'vocabulary_level': 'unknown',
+                'feedback': 'Configure your OpenAI API key in .env for detailed speech analysis.'
+            }
+
         return {
             'transcription': transcription,
             'analysis': analysis,

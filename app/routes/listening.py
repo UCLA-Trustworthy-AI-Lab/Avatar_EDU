@@ -168,11 +168,17 @@ def get_listening_content(topic_id):
 
         if topic_id not in content_data:
             # Generate content using OpenAI for topics not pre-defined
-            content = get_listening_service().generate_avatar_content(f"Topic {topic_id}", "intermediate")
+            try:
+                generated = get_listening_service().generate_avatar_content(f"Topic {topic_id}", "intermediate")
+                transcript = generated.get('story', 'Generated content not available')
+            except Exception as e:
+                logger.error(f"Content generation failed for topic {topic_id}: {e}")
+                transcript = "Content not available. Please configure OpenAI API key for generated listening materials."
+
             content_data[topic_id] = {
                 "title": f"Topic {topic_id}",
                 "audio_url": f"/static/audio/topic_{topic_id}.mp3",
-                "transcript": content.get('story', 'Generated content not available'),
+                "transcript": transcript,
                 "duration": 60,
                 "difficulty": "intermediate",
                 "category": "general"
@@ -333,13 +339,17 @@ def generate_questions():
 
             # Parse the JSON response
             try:
+                # Check if OpenAI returned an error (no API key, etc.)
+                if isinstance(response, dict) and "error" in response:
+                    raise ValueError(f"OpenAI unavailable: {response['error']}")
+
                 if isinstance(response, dict) and "content" in response:
                     questions_data = json.loads(response["content"])
                 elif isinstance(response, dict):
                     questions_data = response
                 else:
                     questions_data = json.loads(response)
-            except json.JSONDecodeError:
+            except (json.JSONDecodeError, ValueError):
                 # Fallback questions if JSON parsing fails
                 questions_data = {
                     "questions": [

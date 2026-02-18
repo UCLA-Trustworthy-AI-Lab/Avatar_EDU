@@ -41,7 +41,7 @@ class OpenAIClient:
     
     def generate_questions(self, content: str, num_questions: int = 5, difficulty: str = "intermediate") -> List[Dict]:
         prompt = f"""
-        Create {num_questions} educational questions based on this content for {difficulty} level students (ages 8-14):
+        Create {num_questions} educational questions based on this content for {difficulty} level students (ages 16-20):
         
         {content}
         
@@ -67,7 +67,7 @@ class OpenAIClient:
     
     def evaluate_answer(self, question: str, correct_answer: str, student_answer: str) -> Dict:
         prompt = f"""
-        Evaluate this student's answer (age 8-14):
+        Evaluate this student's answer (age 16-20):
         
         Question: {question}
         Correct Answer: {correct_answer}
@@ -85,7 +85,7 @@ class OpenAIClient:
     
     def generate_writing_feedback(self, text: str, prompt: str = "") -> Dict:
         feedback_prompt = f"""
-        Provide constructive writing feedback for this student work (ages 8-14):
+        Provide constructive writing feedback for this student work (ages 16-20):
         
         Original Prompt: {prompt}
         Student Writing: {text}

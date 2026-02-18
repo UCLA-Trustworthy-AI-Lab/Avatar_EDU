@@ -347,47 +347,48 @@ class VocabularyService:
     
     def _get_fallback_word_data(self, word: str) -> Dict:
         """
-        Provide fallback word data when external APIs fail
-        
-        Args:
-            word: The word to create fallback data for
-            
-        Returns:
-            Dictionary with basic word information
+        Provide fallback word data when WordsAPI is not configured or unavailable.
+        Uses OpenAI to generate word information if available, otherwise returns
+        a basic response indicating the API is not configured.
         """
-        # Common word definitions for testing
-        fallback_definitions = {
-            'the': 'definite article used to specify a particular noun',
-            'and': 'conjunction used to connect words, phrases, or clauses',
-            'machine': 'a device with moving parts that performs work',
-            'machines': 'plural of machine; devices that perform work',
-            'computer': 'an electronic device for processing data',
-            'technology': 'the application of scientific knowledge for practical purposes',
-            'reading': 'the action of looking at and understanding written words',
-            'student': 'a person who is learning or studying',
-            'language': 'a system of communication used by humans',
-            'learning': 'the process of acquiring knowledge or skills',
-            'education': 'the process of teaching or learning',
-            'knowledge': 'information and understanding gained through experience',
-            'understand': 'to comprehend the meaning of something',
-            'information': 'facts or knowledge provided or learned',
-            'development': 'the process of growing or improving',
-            'important': 'having great significance or value',
-            'different': 'not the same as another',
-            'example': 'a thing characteristic of its kind or illustrating a general rule',
-            'process': 'a series of actions or steps to achieve a result',
-            'system': 'a set of connected things forming a complex whole'
-        }
-        
         word_lower = word.lower()
-        definition = fallback_definitions.get(word_lower, f'A word meaning: {word}')
-        
+
+        # Try OpenAI for word definitions if available
+        try:
+            from app.api.openai_client import OpenAIClient
+            openai_client = OpenAIClient()
+            if openai_client.client:
+                import json
+                response = openai_client.generate_content(
+                    prompt=f"""Provide vocabulary data for the English word "{word}". Return ONLY a JSON object:
+{{
+  "definitions": [{{"definition": "...", "part_of_speech": "noun/verb/adj/adv"}}],
+  "pronunciation": "IPA pronunciation",
+  "examples": ["example sentence 1", "example sentence 2"],
+  "synonyms": ["synonym1", "synonym2", "synonym3"]
+}}""",
+                    max_tokens=300,
+                    temperature=0.3
+                )
+                if isinstance(response, dict) and 'definitions' in response:
+                    return {
+                        'word': word,
+                        'definitions': response['definitions'],
+                        'pronunciation': {'all': response.get('pronunciation', '')},
+                        'examples': response.get('examples', []),
+                        'synonyms': response.get('synonyms', []),
+                        'frequency': 3
+                    }
+        except Exception as e:
+            logger.debug(f"OpenAI fallback for word '{word}' failed: {e}")
+
+        # Final fallback: basic response without any API
         return {
             'word': word,
-            'definitions': [{'definition': definition, 'part_of_speech': 'noun'}],
-            'pronunciation': {'all': f"/{word.lower()}/"},
-            'examples': [f"This is an example sentence using the word {word}."],
-            'synonyms': ['related_word'],
+            'definitions': [{'definition': f'Definition not available. Please configure WordsAPI key in .env to enable vocabulary lookup.', 'part_of_speech': ''}],
+            'pronunciation': {'all': ''},
+            'examples': [],
+            'synonyms': [],
             'frequency': 3
         }
     

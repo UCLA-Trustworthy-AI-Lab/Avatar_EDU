@@ -364,7 +364,6 @@ class InteractiveReader {
             
             // Always check if word_data exists first, regardless of success flag
             if (data.word_data && data.word_data.word) {
-                console.log('Showing word modal - word data available');
                 this.showWordModal(data.word_data);
             } else if (data.success) {
                 // If success is true but no word_data, something is wrong

@@ -24,31 +24,38 @@ class ListeningService:
     
     def generate_avatar_content(self, topic: str, difficulty_level: str = 'intermediate') -> Dict:
         prompt = f"""
-        Create a {difficulty_level} level story about {topic} suitable for children aged 8-14.
+        Create a {difficulty_level} level story about {topic} suitable for English learners aged 16-20.
         The story should be:
         - 2-3 minutes when spoken
         - Engaging and educational
-        - Age-appropriate vocabulary
+        - Academic-level vocabulary
         - Include 3-5 key learning points
-        
+
         Return the story text and key points for comprehension questions.
         """
-        
+
         story_content = self.openai_client.generate_content(prompt)
-        
-        # Generate HeyGen avatar video
-        avatar_video_url = self.heygen_client.create_video(story_content['story'])
-        
+
+        # Check if OpenAI returned an error
+        if isinstance(story_content, dict) and 'error' in story_content:
+            return {
+                'story': f'A short passage about {topic}. This is a placeholder because AI services are not available. Please configure your OpenAI API key in .env for generated content.',
+                'key_points': ['Main topic understanding', 'Detail comprehension'],
+                'difficulty_level': difficulty_level
+            }
+
+        story_text = story_content.get('story') or story_content.get('content') or story_content.get('story_text') or f'A passage about {topic}.'
+        key_points = story_content.get('key_points', ['Main topic understanding', 'Detail comprehension'])
+
         return {
-            'story_text': story_content['story'],
-            'avatar_video_url': avatar_video_url,
-            'key_points': story_content['key_points'],
+            'story': story_text,
+            'key_points': key_points,
             'difficulty_level': difficulty_level
         }
     
     def generate_comprehension_questions(self, story_content: str, num_questions: int = 5) -> List[Dict]:
         prompt = f"""
-        Create {num_questions} comprehension questions for this story suitable for children:
+        Create {num_questions} comprehension questions for this story suitable for students aged 16-20:
         
         {story_content}
         
@@ -62,6 +69,18 @@ class ListeningService:
         """
         
         questions = self.openai_client.generate_content(prompt)
+
+        # Fallback if OpenAI is unavailable
+        if isinstance(questions, dict) and 'error' in questions:
+            return [
+                {
+                    'question': 'What was the main topic of the story?',
+                    'options': ['Option A', 'Option B', 'Option C', 'Option D'],
+                    'correct_answer': 'Option A',
+                    'difficulty': 'medium'
+                }
+            ]
+
         return questions
     
     def evaluate_comprehension(self, session_id: int, answers: List[str]) -> Dict:

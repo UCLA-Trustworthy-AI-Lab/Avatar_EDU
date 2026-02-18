@@ -30,15 +30,20 @@ def register():
                 username=data['username'],
                 email=data['email'],
                 age=data.get('age'),
-                grade_level=data.get('grade_level'),
+                education_level=data.get('education_level'),
+                major_field=data.get('major_field'),
+                english_proficiency_level=data.get('english_proficiency_level'),
+                target_exams=data.get('target_exams'),
+                location=data.get('location'),
                 teacher_id=data.get('teacher_id')
             )
         elif user_type == 'teacher':
             user = Teacher(
                 username=data['username'],
                 email=data['email'],
-                school_name=data.get('school_name'),
-                grade_levels=data.get('grade_levels')
+                institution_name=data.get('institution_name'),
+                education_levels=data.get('education_levels'),
+                specialization=data.get('specialization')
             )
         else:
             return jsonify({'error': 'Invalid user type'}), 400
@@ -106,13 +111,18 @@ def get_profile():
     if isinstance(user, Student):
         profile_data.update({
             'age': user.age,
-            'grade_level': user.grade_level,
+            'education_level': user.education_level,
+            'major_field': user.major_field,
+            'english_proficiency_level': user.english_proficiency_level,
+            'target_exams': user.target_exams,
+            'location': user.location,
             'teacher_id': user.teacher_id
         })
     elif isinstance(user, Teacher):
         profile_data.update({
-            'school_name': user.school_name,
-            'grade_levels': user.grade_levels,
+            'institution_name': user.institution_name,
+            'education_levels': user.education_levels,
+            'specialization': user.specialization,
             'student_count': user.students.count()
         })
     
@@ -138,13 +148,23 @@ def update_profile():
         if isinstance(user, Student):
             if 'age' in data:
                 user.age = data['age']
-            if 'grade_level' in data:
-                user.grade_level = data['grade_level']
+            if 'education_level' in data:
+                user.education_level = data['education_level']
+            if 'major_field' in data:
+                user.major_field = data['major_field']
+            if 'english_proficiency_level' in data:
+                user.english_proficiency_level = data['english_proficiency_level']
+            if 'target_exams' in data:
+                user.target_exams = data['target_exams']
+            if 'location' in data:
+                user.location = data['location']
         elif isinstance(user, Teacher):
-            if 'school_name' in data:
-                user.school_name = data['school_name']
-            if 'grade_levels' in data:
-                user.grade_levels = data['grade_levels']
+            if 'institution_name' in data:
+                user.institution_name = data['institution_name']
+            if 'education_levels' in data:
+                user.education_levels = data['education_levels']
+            if 'specialization' in data:
+                user.specialization = data['specialization']
         
         db.session.commit()
         return jsonify({'message': 'Profile updated successfully'}), 200
@@ -200,7 +220,8 @@ def get_students():
             'id': student.id,
             'username': student.username,
             'age': student.age,
-            'grade_level': student.grade_level,
+            'education_level': student.education_level,
+            'english_proficiency_level': student.english_proficiency_level,
             'created_at': student.created_at.isoformat()
         })
     

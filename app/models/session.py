@@ -5,7 +5,7 @@ class LearningSession(db.Model):
     __tablename__ = 'learning_sessions'
 
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
     module_type = db.Column(db.String(20), nullable=False)  # listening, speaking, reading, writing
     activity_type = db.Column(db.String(50))
     started_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -49,8 +49,8 @@ class ConversationSession(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     session_id = db.Column(db.String(100), unique=True, nullable=False)  # HeyGen session ID
-    student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    learning_session_id = db.Column(db.Integer, db.ForeignKey('learning_session.id'), nullable=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
+    learning_session_id = db.Column(db.Integer, db.ForeignKey('learning_sessions.id'), nullable=True)
     
     # Session metadata
     conversation_topic = db.Column(db.String(50))  # general, daily_life, academic, business, travel

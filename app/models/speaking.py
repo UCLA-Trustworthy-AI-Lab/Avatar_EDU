@@ -7,7 +7,7 @@ class SpeakingSession(db.Model):
     __tablename__ = 'speaking_sessions'
 
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
     session_id = db.Column(db.Integer, db.ForeignKey('learning_sessions.id'), nullable=False)
 
     # Three sub-sections
@@ -131,7 +131,7 @@ class WordPronunciationHistory(db.Model):
     __tablename__ = 'word_pronunciation_history'
 
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
     word = db.Column(db.String(100), nullable=False)
 
     # Tracking scores over time
@@ -231,7 +231,7 @@ class StudentSpeakingChallenge(db.Model):
     __tablename__ = 'student_speaking_challenges'
 
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
     challenge_id = db.Column(db.Integer, db.ForeignKey('speaking_challenges.id'), nullable=False)
 
     # Progress tracking

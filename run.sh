@@ -5,7 +5,10 @@ GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}Starting Language Arts Agent servers...${NC}"
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+echo -e "${BLUE}Starting Avatar EDU servers...${NC}"
 
 # Function to kill servers on exit
 cleanup() {
@@ -19,7 +22,7 @@ trap cleanup EXIT INT TERM
 
 # Start Flask backend server
 echo -e "${GREEN}Starting Flask server on http://localhost:5001...${NC}"
-cd /Users/chunhewang/Documents/GitHub/language-arts-agent
+cd "$SCRIPT_DIR"
 uv run python run.py &
 FLASK_PID=$!
 
@@ -28,7 +31,7 @@ sleep 2
 
 # Start Next.js frontend server
 echo -e "${GREEN}Starting HeyGen Avatar server on http://localhost:3000...${NC}"
-cd /Users/chunhewang/Documents/GitHub/language-arts-agent/InteractiveAvatarNextJSDemo
+cd "$SCRIPT_DIR/InteractiveAvatarNextJSDemo"
 npm run dev &
 NEXTJS_PID=$!
 

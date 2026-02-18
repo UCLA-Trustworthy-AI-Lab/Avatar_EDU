@@ -442,6 +442,10 @@ Analyze every sentence individually. Be specific and constructive. Return only v
 
             # Parse the JSON response
             try:
+                # Check if OpenAI returned an error (no API key, etc.)
+                if isinstance(response, dict) and "error" in response:
+                    raise ValueError(f"OpenAI unavailable: {response['error']}")
+
                 # generate_content returns a dict, check if it's already parsed JSON
                 if isinstance(response, dict) and "content" in response:
                     analysis_data = json.loads(response["content"])
@@ -451,58 +455,7 @@ Analyze every sentence individually. Be specific and constructive. Return only v
                     analysis_data = json.loads(response)
             except (json.JSONDecodeError, TypeError):
                 # Fallback analysis if JSON parsing fails
-                sentences = text.split('.')
-                word_count = len(text.split())
-
-                analysis_data = {
-                    "overall_score": 75,
-                    "word_count": word_count,
-                    "readability_level": "intermediate",
-                    "strengths": [
-                        "Clear communication of ideas",
-                        "Appropriate length for the task"
-                    ],
-                    "areas_for_improvement": [
-                        "Consider adding more specific examples",
-                        "Work on sentence variety"
-                    ],
-                    "grammar_issues": [
-                        {
-                            "issue": "Review needed",
-                            "sentence": "Please review your writing for grammar accuracy",
-                            "correction": "Use grammar checking tools for detailed feedback",
-                            "explanation": "AI analysis temporarily unavailable"
-                        }
-                    ],
-                    "style_suggestions": [
-                        {
-                            "suggestion": "Vary sentence structure",
-                            "example": "Mix short and long sentences for better flow",
-                            "priority": "medium"
-                        }
-                    ],
-                    "content_feedback": {
-                        "thesis_clarity": "adequate",
-                        "argument_strength": "good",
-                        "evidence_quality": "adequate",
-                        "organization": "logical",
-                        "conclusion_effectiveness": "adequate"
-                    },
-                    "sentence_analysis": [
-                        {
-                            "sentence": sentence.strip(),
-                            "issues": ["Consider revising for clarity"],
-                            "alternatives": ["Try rephrasing for better impact"],
-                            "score": 7
-                        } for sentence in sentences[:3] if sentence.strip()
-                    ],
-                    "vocabulary_assessment": {
-                        "complexity_level": "intermediate",
-                        "advanced_words": [],
-                        "suggestions": ["Try incorporating more advanced vocabulary"]
-                    },
-                    "overall_feedback": "Your writing shows good organization and clear communication. Continue practicing to improve grammar and style."
-                }
+                analysis_data = _basic_text_analysis(text, topic, prompt)
 
             # Update the writing session with analysis results
             session_id = data.get('session_id')
@@ -585,44 +538,8 @@ Analyze every sentence individually. Be specific and constructive. Return only v
             logger.error(f"OpenAI analysis failed: {e}")
 
             # Fallback analysis when OpenAI is not available
-            sentences = text.split('.')
-            word_count = len(text.split())
-
-            fallback_analysis = {
-                "overall_score": 70,
-                "word_count": word_count,
-                "readability_level": "intermediate",
-                "strengths": [
-                    "Completed the writing task",
-                    "Appropriate length"
-                ],
-                "areas_for_improvement": [
-                    "Use online grammar tools for detailed feedback",
-                    "Consider peer review for content suggestions"
-                ],
-                "grammar_issues": [],
-                "style_suggestions": [
-                    {
-                        "suggestion": "Review sentence structure",
-                        "example": "Ensure sentences are clear and varied",
-                        "priority": "medium"
-                    }
-                ],
-                "content_feedback": {
-                    "thesis_clarity": "adequate",
-                    "argument_strength": "adequate",
-                    "evidence_quality": "adequate",
-                    "organization": "adequate",
-                    "conclusion_effectiveness": "adequate"
-                },
-                "sentence_analysis": [],
-                "vocabulary_assessment": {
-                    "complexity_level": "basic",
-                    "advanced_words": [],
-                    "suggestions": ["Try using more sophisticated vocabulary"]
-                },
-                "overall_feedback": "Basic analysis completed. For detailed feedback, please ensure AI services are available."
-            }
+            # Perform real basic text analysis instead of giving a fixed score
+            fallback_analysis = _basic_text_analysis(text, topic, prompt)
 
             return jsonify({
                 'success': True,
@@ -635,6 +552,239 @@ Analyze every sentence individually. Be specific and constructive. Return only v
             'success': False,
             'error': 'Failed to analyze writing'
         }), 500
+
+def _basic_text_analysis(text: str, topic: str = '', prompt: str = '') -> dict:
+    """
+    Perform real basic text analysis without AI.
+    Scores based on actual text quality metrics rather than giving a fixed score.
+    """
+    words = text.split()
+    word_count = len(words)
+
+    # Split into sentences (handle multiple punctuation types)
+    sentences = [s.strip() for s in re.split(r'[.!?]+', text) if s.strip()]
+    sentence_count = len(sentences)
+
+    # --- Word-level metrics ---
+    unique_words = set(w.lower().strip('.,!?;:"\'-()[]') for w in words)
+    unique_word_count = len(unique_words)
+    avg_word_length = sum(len(w) for w in words) / max(word_count, 1)
+    vocabulary_diversity = unique_word_count / max(word_count, 1)
+
+    # Identify longer/advanced words (6+ letters)
+    advanced_words = [w for w in unique_words if len(w) >= 6 and w.isalpha()]
+    advanced_ratio = len(advanced_words) / max(unique_word_count, 1)
+
+    # --- Sentence-level metrics ---
+    sentence_lengths = [len(s.split()) for s in sentences]
+    avg_sentence_length = sum(sentence_lengths) / max(sentence_count, 1)
+
+    # Check sentence length variety (standard deviation)
+    if len(sentence_lengths) > 1:
+        mean_len = avg_sentence_length
+        variance = sum((l - mean_len) ** 2 for l in sentence_lengths) / len(sentence_lengths)
+        sentence_variety = variance ** 0.5
+    else:
+        sentence_variety = 0
+
+    # --- Basic grammar checks ---
+    grammar_issues = []
+
+    # Check for sentences not starting with capital letter
+    for i, s in enumerate(sentences):
+        if s and not s[0].isupper():
+            grammar_issues.append({
+                "issue": "Capitalization",
+                "sentence": s[:80],
+                "correction": s[0].upper() + s[1:] if len(s) > 1 else s.upper(),
+                "explanation": "Sentences should start with a capital letter"
+            })
+
+    # Check for very short sentences (fragments)
+    for s in sentences:
+        wc = len(s.split())
+        if wc < 3 and wc > 0:
+            grammar_issues.append({
+                "issue": "Sentence fragment",
+                "sentence": s,
+                "correction": "Consider expanding this into a complete sentence",
+                "explanation": "Very short sentences may be sentence fragments"
+            })
+
+    # Check for very long sentences (run-ons)
+    for s in sentences:
+        wc = len(s.split())
+        if wc > 50:
+            grammar_issues.append({
+                "issue": "Run-on sentence",
+                "sentence": s[:80] + "...",
+                "correction": "Consider breaking this into shorter sentences",
+                "explanation": "Sentences over 50 words are hard to follow"
+            })
+
+    # Check repeated words in succession
+    for i in range(len(words) - 1):
+        if words[i].lower().strip('.,!?') == words[i + 1].lower().strip('.,!?') and words[i].isalpha():
+            grammar_issues.append({
+                "issue": "Repeated word",
+                "sentence": f"...{words[max(0,i-2):i+3]}...",
+                "correction": f"Remove duplicate '{words[i]}'",
+                "explanation": "Consecutive repeated words are usually unintentional"
+            })
+
+    # --- Topic relevance (basic keyword check) ---
+    topic_words = set(w.lower() for w in (topic + ' ' + prompt).split() if len(w) > 3)
+    text_words_lower = set(w.lower().strip('.,!?;:"\'-()[]') for w in words)
+    topic_overlap = len(topic_words & text_words_lower) / max(len(topic_words), 1) if topic_words else 0.5
+    on_topic = topic_overlap > 0.15
+
+    # --- Scoring ---
+    # Length score (0-25): penalize too short or too long
+    if word_count < 50:
+        length_score = max(5, word_count * 0.3)
+    elif word_count < 100:
+        length_score = 10 + (word_count - 50) * 0.2
+    elif word_count < 250:
+        length_score = 20
+    elif word_count <= 500:
+        length_score = 25
+    else:
+        length_score = 22  # Slightly penalize for being over limit
+
+    # Vocabulary score (0-25)
+    vocab_score = min(25, (vocabulary_diversity * 30) + (advanced_ratio * 40) + (avg_word_length - 3) * 3)
+    vocab_score = max(5, vocab_score)
+
+    # Structure score (0-25): sentence variety, avg length, paragraph structure
+    structure_score = 10
+    if 10 <= avg_sentence_length <= 25:
+        structure_score += 8
+    elif 8 <= avg_sentence_length <= 30:
+        structure_score += 4
+    if sentence_variety > 3:
+        structure_score += 4
+    if sentence_count >= 5:
+        structure_score += 3
+    structure_score = min(25, structure_score)
+
+    # Grammar score (0-25): deduct for issues found
+    grammar_score = max(5, 25 - len(grammar_issues) * 3)
+
+    overall_score = int(length_score + vocab_score + structure_score + grammar_score)
+    overall_score = max(10, min(100, overall_score))
+
+    # --- Determine readability level ---
+    if avg_word_length > 5.5 and vocabulary_diversity > 0.6:
+        readability = "advanced"
+    elif avg_word_length > 4.5 and vocabulary_diversity > 0.45:
+        readability = "intermediate"
+    else:
+        readability = "basic"
+
+    # --- Build strengths and weaknesses ---
+    strengths = []
+    areas_for_improvement = []
+
+    if word_count >= 200:
+        strengths.append("Good essay length")
+    elif word_count < 100:
+        areas_for_improvement.append(f"Essay is very short ({word_count} words). Aim for at least 250 words.")
+
+    if vocabulary_diversity > 0.6:
+        strengths.append("Good vocabulary diversity")
+    else:
+        areas_for_improvement.append("Try using more varied vocabulary instead of repeating words")
+
+    if len(advanced_words) >= 5:
+        strengths.append(f"Uses advanced vocabulary ({len(advanced_words)} complex words)")
+    else:
+        areas_for_improvement.append("Try incorporating more sophisticated vocabulary")
+
+    if 10 <= avg_sentence_length <= 25:
+        strengths.append("Good sentence length")
+    elif avg_sentence_length < 8:
+        areas_for_improvement.append("Sentences are too short. Try combining ideas.")
+    elif avg_sentence_length > 30:
+        areas_for_improvement.append("Sentences are too long. Break them into shorter ones.")
+
+    if sentence_variety > 5:
+        strengths.append("Good variety in sentence length")
+    elif sentence_count > 3:
+        areas_for_improvement.append("Vary your sentence lengths for better flow")
+
+    if not grammar_issues:
+        strengths.append("No obvious grammar issues detected")
+    else:
+        areas_for_improvement.append(f"Found {len(grammar_issues)} potential grammar issue(s)")
+
+    if on_topic:
+        strengths.append("Content appears relevant to the topic")
+    else:
+        areas_for_improvement.append("Essay may not address the given topic/prompt")
+
+    if not strengths:
+        strengths.append("Completed the writing task")
+    if not areas_for_improvement:
+        areas_for_improvement.append("Configure OpenAI API key in .env for detailed AI feedback")
+
+    # --- Sentence-by-sentence basic analysis ---
+    sentence_analysis = []
+    for i, s in enumerate(sentences[:10]):  # Limit to first 10 sentences
+        s_words = s.split()
+        s_len = len(s_words)
+        issues = []
+        if s and not s[0].isupper():
+            issues.append("Missing capitalization")
+        if s_len < 3:
+            issues.append("Very short - possible fragment")
+        if s_len > 40:
+            issues.append("Very long - consider splitting")
+
+        effectiveness = "Strong" if 8 <= s_len <= 25 and not issues else "Adequate" if not issues else "Needs work"
+        sentence_analysis.append({
+            "sentence": s[:120],
+            "issues": issues if issues else ["No obvious issues"],
+            "alternatives": [],
+            "score": max(3, min(10, 8 - len(issues)))
+        })
+
+    return {
+        "overall_score": overall_score,
+        "word_count": word_count,
+        "readability_level": readability,
+        "strengths": strengths,
+        "areas_for_improvement": areas_for_improvement,
+        "grammar_issues": grammar_issues[:10],  # Limit to 10
+        "style_suggestions": [
+            {
+                "suggestion": "Vary sentence structure" if sentence_variety < 3 else "Maintain sentence variety",
+                "example": f"Average sentence length: {avg_sentence_length:.1f} words",
+                "priority": "high" if sentence_variety < 2 else "low"
+            }
+        ],
+        "content_feedback": {
+            "thesis_clarity": "unable to assess without AI",
+            "argument_strength": "unable to assess without AI",
+            "evidence_quality": "unable to assess without AI",
+            "organization": "adequate" if sentence_count >= 5 else "needs more development",
+            "conclusion_effectiveness": "unable to assess without AI"
+        },
+        "sentence_analysis": sentence_analysis,
+        "vocabulary_assessment": {
+            "complexity_level": readability,
+            "advanced_words": sorted(list(advanced_words))[:15],
+            "suggestions": areas_for_improvement[:2]
+        },
+        "overall_feedback": (
+            f"Basic analysis: {word_count} words, {sentence_count} sentences, "
+            f"vocabulary diversity {vocabulary_diversity:.0%}. "
+            f"Score: {overall_score}/100. "
+            f"Configure your OpenAI API key in .env for detailed AI-powered feedback "
+            f"including grammar correction, style suggestions, and content analysis."
+        ),
+        "note": "This is a basic text analysis. For comprehensive AI-powered feedback, configure your OpenAI API key."
+    }
+
 
 @bp.route('/sessions', methods=['GET'])
 @jwt_required()
