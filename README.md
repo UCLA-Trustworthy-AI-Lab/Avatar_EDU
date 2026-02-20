@@ -1,6 +1,6 @@
 # Avatar EDU - AI-Powered English Learning Platform
 
-Avatar EDU is a comprehensive, AI-driven English Language Arts learning platform built for Chinese high school and college students (ages 16-20). It integrates five interconnected learning modules — **Reading**, **Speaking**, **Listening**, **Writing**, and **Conversation** — into a unified system with cross-module memory that personalizes learning over time.
+Avatar EDU is a comprehensive, AI-driven English Language Arts learning platform built for students who want to learning English. It integrates five interconnected learning modules — **Reading**, **Speaking**, **Listening**, **Writing**, and **Conversation** — into a unified system with cross-module memory that personalizes learning over time.
 
 The platform combines a **Flask backend** serving four skill modules with a **Next.js frontend** powering an interactive streaming avatar conversation experience using [HeyGen](https://www.heygen.com/)'s Streaming Avatar SDK. All modules are connected through a shared student database, JWT authentication, and an Extract-Compress-Retrieve memory pipeline that tracks learning progress across sessions.
 
